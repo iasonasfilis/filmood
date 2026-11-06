@@ -10,7 +10,7 @@ type Axis = "dark" | "pace" | "emotion" | "mind" | "visual" | "indie" | "humor" 
 type DNA = Record<Axis, number>;
 type Film = { id:number; title:string; year:number; length:number; region:"American"|"European"|"Asian"|"World"; genres:string[]; description:string; dna:DNA; poster?:string };
 type Mode = "mood" | "filmood";
-type View = "start" | "play" | "results" | "lab";
+type View = "start" | "play" | "results" | "lab" | "fusion" | "fingerprint" | "blind";
 const AXES: {key:Axis; name:string; low:string; high:string}[] = [
   {key:"dark",name:"Atmosphere",low:"Bright & comforting",high:"Dark & unsettling"},
   {key:"pace",name:"Pacing",low:"Slow burn",high:"Fast & kinetic"},
@@ -75,6 +75,14 @@ const matchPercentage=(film:Film,target:DNA)=>Math.round(Math.max(0,Math.min(100
 const readable=(key:Axis,film:Film)=>AXES.find(a=>a.key===key)!.name.toLowerCase();
 export default function Studio(){
  const [mode,setMode]=useState<Mode>("mood");
+ const [fusionA,setFusionA]=useState("Arrival");
+ const [fusionB,setFusionB]=useState("Parasite");
+ const [fusionWeight,setFusionWeight]=useState(60);
+ const [situation,setSituation]=useState("Any occasion");
+ const [surpriseLevel,setSurpriseLevel]=useState("Unexpected");
+ const [blindFilm,setBlindFilm]=useState<number|null>(null);
+ const [blindRevealed,setBlindRevealed]=useState(false);
+ const [surpriseNonce,setSurpriseNonce]=useState(0);
  const [view,setView]=useState<View>("start");
  const [moods,setMoods]=useState<string[]>([]);
  const [chatInput,setChatInput]=useState("");
@@ -100,9 +108,11 @@ export default function Studio(){
  useLayoutEffect(()=>{window.scrollTo({top:0,left:0,behavior:"instant"});},[view]);
  useEffect(()=>{try{const s=localStorage.getItem(STORAGE);if(s){const p=JSON.parse(s);if(Array.isArray(p.saved))setSaved(p.saved);if(Array.isArray(p.watched))setWatched(p.watched);if(Array.isArray(p.passed))setPassed(p.passed);if(Array.isArray(p.liked))setLiked(p.liked);if(Array.isArray(p.subscribed))setSubscribed(p.subscribed);}}catch{}setLoaded(true);},[]);
  useEffect(()=>{if(loaded){try{localStorage.setItem(STORAGE,JSON.stringify({saved,watched,passed,liked,subscribed}));}catch{}}},[saved,watched,passed,liked,subscribed,loaded]);
+ const fusionDNA=AXES.reduce((a,axis)=>{const first=FILMS.find(f=>f.title===fusionA)?.dna||FILMS[0].dna;const second=FILMS.find(f=>f.title===fusionB)?.dna||FILMS[12].dna;a[axis.key]=Math.round(first[axis.key]*fusionWeight/100+second[axis.key]*(100-fusionWeight)/100);return a;},{} as DNA);
+ const fingerprint=useMemo(()=>{const films=FILMS.filter(f=>liked.includes(f.id)||watched.includes(f.id));if(!films.length)return null;return AXES.reduce((a,axis)=>{a[axis.key]=Math.round(films.reduce((sum,f)=>sum+f.dna[axis.key]*(liked.includes(f.id)?2:1),0)/films.reduce((sum,f)=>sum+(liked.includes(f.id)?2:1),0));return a;},{} as DNA);},[liked,watched]);
  const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
  const moodDNA=AXES.reduce((acc,axis)=>{const selected=MOOD_PRESETS.filter(m=>moods.includes(m.label));acc[axis.key]=selected.length?Math.round(selected.reduce((sum,m)=>sum+m.target[axis.key],0)/selected.length):50;return acc;},{} as DNA);
- const target=view==="lab"?mix:chatTarget|| (mode==="filmood"?referenceDNA:moodDNA);
+ const target=view==="lab"?mix:view==="fusion"?fusionDNA:chatTarget|| (mode==="filmood"?referenceDNA:moodDNA);
  const results=useMemo(()=>FILMS.filter(f=>!passed.includes(f.id)&&!watched.includes(f.id))
   .filter(f=>mode!=="filmood"||f.title!==reference)
   .filter(f=>region==="Anywhere"||f.region===region)
@@ -111,6 +121,7 @@ export default function Studio(){
   .sort((a,b)=>matchPercentage(b.film,target)-matchPercentage(a.film,target)||a.score-b.score||a.film.id-b.film.id).slice(0,6).map(x=>x.film),
   [mode,reference,region,runtime,depth,passed,watched,liked,target]);
  const filmSuggestions=useMemo(()=>{const q=filmQuery.trim().toLowerCase();const pool=FILMS.filter(f=>f.title!==reference);return pool.map(f=>({film:f,score:distance(f,referenceDNA)})).sort((a,b)=>{if(q){const aMatch=a.film.title.toLowerCase().includes(q)?0:1;const bMatch=b.film.title.toLowerCase().includes(q)?0:1;if(aMatch!==bMatch)return aMatch-bMatch;}return matchPercentage(b.film,referenceDNA)-matchPercentage(a.film,referenceDNA)||a.film.id-b.film.id;}).slice(0,6).map(x=>x.film);},[filmQuery,reference,referenceDNA]);
+ const selectSurprise=()=>{const pool=FILMS.filter(f=>!watched.includes(f.id)&&!passed.includes(f.id));if(!pool.length){setBlindFilm(null);setView("blind");return;}const sorted=pool.map(f=>({film:f,match:matchPercentage(f,target)})).sort((a,b)=>b.match-a.match);const candidates=surpriseLevel==="Safe"?sorted.slice(0,Math.max(1,Math.ceil(sorted.length*.3))):surpriseLevel==="Wild Card"?sorted.slice(Math.floor(sorted.length*.5)):sorted.slice(Math.floor(sorted.length*.2),Math.max(1,Math.ceil(sorted.length*.8)));const pick=candidates[(surpriseNonce+Math.floor(Math.random()*candidates.length))%candidates.length];setBlindFilm(pick?.film.id??null);setBlindRevealed(false);setSurpriseNonce(n=>n+1);setView("blind");};
  const launch=()=>{if(mode==="mood"&&moods.length===0&&!chatTarget)return;setMix({...target});setView("results");};
  const chooseMode=(next:Mode)=>{if(next==="mood")setMoods([]);setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);setFilmQuery("");setView("play");};
  const chooseMood=(label:string)=>{setMoods(prev=>prev.includes(label)?(prev.filter(x=>x!==label)):[...prev,label]);setChatTarget(null);};
@@ -119,14 +130,14 @@ export default function Studio(){
  const changeReference=(value:string)=>{setReference(value);setMix({...(REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||REFERENCES[0].dna)});};
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
  const reset=()=>{setMix({...referenceDNA});setRegion("Anywhere");setRuntime("Any length");setDepth(52);};
- const sharedReason=(f:Film)=>{const closer=AXES.map(a=>({key:a.key,name:readable(a.key,f),delta:Math.abs(f.dna[a.key]-target[a.key])})).sort((a,b)=>a.delta-b.delta).slice(0,2).map(a=>a.name).join(" and ");return "Close to your selected "+closer+" preferences. "+f.description;};
+ const sharedReason=(f:Film)=>{const closer=AXES.map(a=>({key:a.key,name:readable(a.key,f),delta:Math.abs(f.dna[a.key]-target[a.key])})).sort((a,b)=>a.delta-b.delta).slice(0,2).map(a=>a.name).join(" and ");const differences=AXES.map(a=>({name:a.name.toLowerCase(),delta:f.dna[a.key]-target[a.key]})).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));const contrast=differences[0];return "The vibe match: "+closer+". Compared with your mix, "+f.title+" leans "+(contrast.delta>0?"more ":"less ")+contrast.name+". "+f.description;};
  return <main className="studio">
   <header className="studio-nav">
    <a href="/" className="studio-word">FILMOOD<span>.</span></a>
    <nav aria-label="Discovery navigation">
     <button className={view==="start"?"active":""} onClick={()=>setView("start")}>Discover</button>
     <button className={view==="lab"?"active":""} onClick={()=>enterLab()}><FlaskConical size={15}/> Film Lab</button>
-    <button onClick={()=>setProviderOpen(!providerOpen)}>My services</button>
+    <button onClick={()=>setView("fusion")}>DNA Fusion</button><button onClick={()=>setView("fingerprint")}>My fingerprint</button><button onClick={()=>setProviderOpen(!providerOpen)}>My services</button>
    </nav>
   </header>
   {providerOpen&&<section className="studio-providers">
@@ -144,6 +155,7 @@ export default function Studio(){
     <button className="studio-mode" onClick={()=>chooseMode("mood")}><Heart size={27}/><strong>MOOD.</strong><span>Start with a feeling. Discover where it takes you.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
     <button className="studio-mode" onClick={()=>chooseMode("filmood")}><Clapperboard size={27}/><strong>FILMOOD.</strong><span>Start with a film. Follow its emotional aftertaste.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
    </div>
+   <div className="studio-new-features"><button onClick={()=>setView("fusion")}>DNA Fusion · Blend two films <ArrowRight size={16}/></button><button onClick={()=>setView("fingerprint")}>Your cinematic fingerprint <ArrowRight size={16}/></button><button onClick={selectSurprise}>Blind date with a film <ArrowRight size={16}/></button></div>
    <button className="studio-teaser" onClick={()=>enterLab()}><FlaskConical size={20}/><span><strong>The Film Lab.</strong><small>Mix your cinematic DNA. Make something unexpected.</small></span><ArrowRight size={18}/></button>
   </section>}
   {view==="play"&&<section className="studio-play">
@@ -158,6 +170,7 @@ export default function Studio(){
       <div className="studio-filmood-six">{filmSuggestions.map((f,i)=><button key={f.id} className="studio-filmood-tile" onClick={()=>{changeReference(f.title);setFilmQuery("");setChatTarget(null);}} aria-label={"Find films inspired by "+f.title}><div className="studio-filmood-art">{f.poster?<img src={"https://image.tmdb.org/t/p/w500/"+f.poster} alt="" loading="lazy"/>:<span>{f.title.slice(0,1)}</span>}<small>{String(i+1).padStart(2,"0")}</small></div><strong>{f.title}</strong><span>{f.year} · {matchPercentage(f,referenceDNA)}% DNA</span></button>)}</div>
      </div>}
     {mode==="mood"&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} {moods.length>1?"×":"✓"}</button>)}</div><small>Every selected mood contributes equally to the cinematic DNA used for recommendations.</small></div>}
+    <label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>
     <div className="studio-play-actions"><button className="studio-primary" disabled={mode==="mood"&&moods.length===0&&!chatTarget} onClick={launch}>Discover films <ArrowRight size={18}/></button></div></div>
     <aside className="studio-chat-panel"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Tell FILMOOD what you're looking for</strong><small>Say anything, your way · Demo keyword interpretation, not connected to AI yet</small></div></div>
     {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
@@ -165,6 +178,9 @@ export default function Studio(){
     <form onSubmit={e=>{e.preventDefault();void sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Something beautiful, melancholic and a little mysterious…":"Like Arrival, but darker, stranger and more intense…"} /><button type="submit" disabled={!chatInput.trim()} aria-label="Ask Filmate"><ArrowRight size={20}/></button></form>
     <p className="studio-filmmate-note">Filmate Lite runs locally — no API key, no external AI. It understands selected film preferences and keywords, not unrestricted human conversation.</p></aside></div>
   </section>}
+  {view==="fusion"&&<section className="studio-feature-screen"><p className="studio-eyebrow">FILMOOD EXPERIMENTS / 01</p><h1>Movie DNA Fusion.</h1><p>Blend the emotional signature of two films. Find something between them.</p><div className="studio-fusion-controls"><label>FIRST FILM<select value={fusionA} onChange={e=>setFusionA(e.target.value)}>{FILMS.map(f=><option key={f.id}>{f.title}</option>)}</select></label><label>SECOND FILM<select value={fusionB} onChange={e=>setFusionB(e.target.value)}>{FILMS.map(f=><option key={f.id}>{f.title}</option>)}</select></label></div><label className="studio-fusion-weight"><span>{fusionA} {fusionWeight}% · {fusionB} {100-fusionWeight}%</span><input type="range" min="0" max="100" value={fusionWeight} onChange={e=>setFusionWeight(Number(e.target.value))}/></label><button className="studio-primary" onClick={()=>{setMix({...fusionDNA});setView("lab");}}>Remix in Film Lab <ArrowRight size={18}/></button><h2>Your fused film matches</h2><div className="studio-feature-matches">{FILMS.filter(f=>f.title!==fusionA&&f.title!==fusionB).map(f=>({f,score:matchPercentage(f,fusionDNA)})).sort((a,b)=>b.score-a.score).slice(0,6).map(({f,score})=><button key={f.id} onClick={()=>setDetails(f)}><strong>{f.title}</strong><span>{score}% DNA match</span><small>{f.description}</small></button>)}</div></section>}
+  {view==="fingerprint"&&<section className="studio-feature-screen"><p className="studio-eyebrow">YOUR CINEMATIC IDENTITY</p><h1>Your cinematic fingerprint.</h1><p>Built locally from films you marked Watched or Liked. Nothing is sent to a server.</p>{fingerprint?<><p className="studio-fingerprint-summary">Your strongest signals: {AXES.map(a=>({name:a.name,value:fingerprint[a.key]})).sort((a,b)=>b.value-a.value).slice(0,3).map(a=>a.name.toLowerCase()).join(", ")}.</p><div className="studio-fingerprint-axes">{AXES.map(a=><div key={a.key}><span>{a.name} · {fingerprint[a.key]}%</span><progress value={fingerprint[a.key]} max={100}/></div>)}</div></>:<p className="studio-empty">No fingerprint yet. Open a film, mark it Watched, or tap More like this on a recommendation to start building your profile.</p>}<button className="studio-primary" onClick={()=>setView("start")}>Explore films <ArrowRight size={18}/></button></section>}
+  {view==="blind"&&<section className="studio-feature-screen"><p className="studio-eyebrow">NO POSTERS. NO SPOILERS.</p><h1>Blind date with a film.</h1><p>Discover a film without judging its title or popularity first.</p><label className="studio-occasion">HOW ADVENTUROUS?<select value={surpriseLevel} onChange={e=>setSurpriseLevel(e.target.value)}>{["Safe","Unexpected","Wild Card"].map(x=><option key={x}>{x}</option>)}</select></label>{(()=>{const f=FILMS.find(x=>x.id===blindFilm);return f?<div className="studio-blind-card"><span>THE MYSTERY PICK</span><h2>{blindRevealed?f.title:"A film waiting to be discovered."}</h2><p>{blindRevealed?f.description:"Atmosphere: "+(f.dna.dark>60?"Dark and moody":"Warm or balanced")+". Pacing: "+(f.dna.pace>60?"Energetic":"Unhurried")+". Story: "+(f.dna.mind>65?"Thought-provoking":"Accessible")+". "}</p>{blindRevealed?<p>{f.year} · {f.length} min · {f.genres.join(", ")}</p>:<button className="studio-primary" onClick={()=>setBlindRevealed(true)}>Reveal the film <ArrowRight size={18}/></button>}</div>:<p className="studio-empty">No unseen films left in the demo catalog. Restore passed films or try another discovery.</p>;})()}<button className="studio-feature-secondary" onClick={selectSurprise}>Another mystery pick <RotateCcw size={16}/></button></section>}
   {(view==="results"||view==="lab")&&<section className="studio-workspace">
    <div className="studio-workspace-head"><button onClick={()=>setView("play")}><ArrowLeft size={15}/> Back to discovery</button><span>{view==="lab"?"THE FILM LAB.":"YOUR DISCOVERY"}</span><button onClick={()=>enterLab()} disabled={view==="lab"}><SlidersHorizontal size={16}/> Remix</button></div>
    {view==="lab"&&<div className="studio-lab-banner"><span>THE FILM LAB / EXPERIMENT NO. 001</span><h2>Rewrite the feeling.<br/><em>Keep the magic.</em></h2><p>Eight cinematic ingredients. Endless ways to change the atmosphere. Drag, remix, discover.</p><div className="studio-lab-steps"><span>01 · CHOOSE A FILM</span><span>02 · REMIX ITS DNA</span><span>03 · DISCOVER YOUR CUT</span></div></div>}
@@ -176,10 +192,10 @@ export default function Studio(){
        <div className="studio-lab-meter"><span>YOUR CURRENT MIX</span><strong>{Math.round(AXES.reduce((n,a)=>n+mix[a.key],0)/AXES.length)}<small> / 100</small></strong><p>Average intensity across your eight ingredients</p></div><div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
      </>:<>
        <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."}</p><h1>We found your kind of films.</h1><p className="studio-muted">{mode==="mood"?"A few picks for the feeling you're after.":"Inspired by "+reference+" and its emotional signature."}</p>
-       <div className="studio-summary"><span>{mode==="mood"?moods.join(" + "):"Inspired by "+reference}</span><button onClick={()=>setView("play")}>Change</button></div>
+       <div className="studio-summary"><span>{situation!=="Any occasion"?situation+" · ":""}{mode==="mood"?moods.join(" + "):"Inspired by "+reference}</span><button onClick={()=>setView("play")}>Change</button></div>
        <button className="studio-lab-invite" onClick={()=>enterLab()}><FlaskConical size={19}/> These are close. Want to experiment? <ArrowRight size={16}/></button>
      </>}
-     <div className="studio-more">
+     <div className="studio-more"><label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>
       <h3>Explore a little further</h3>
       <div className="studio-fields"><label>Film length<select value={runtime} onChange={e=>setRuntime(e.target.value)}><option>Any length</option><option>Under 100 min</option><option>100–140 min</option><option>Over 140 min</option></select></label>
        <label>Cinema<select value={region} onChange={e=>setRegion(e.target.value)}><option>Anywhere</option><option>American</option><option>European</option><option>Asian</option><option>World</option></select></label></div>
@@ -187,7 +203,7 @@ export default function Studio(){
      </div>
     </section>
     <section className="studio-results">
-     <div className="studio-row"><div><p className="studio-eyebrow">LIVE RESULTS</p><h2>{view==="lab"?"The director’s cut":"Your films for tonight"}</h2></div><span className="studio-live"><i/>LIVE</span></div>
+     <div className="studio-surprise-actions"><label>Surprise level <select value={surpriseLevel} onChange={e=>setSurpriseLevel(e.target.value)}>{["Safe","Unexpected","Wild Card"].map(s=><option key={s}>{s}</option>)}</select></label><button onClick={selectSurprise}>Surprise me <Sparkles size={16}/></button><button onClick={()=>setView("fusion")}>Fuse two films <ArrowRight size={16}/></button></div><div className="studio-row"><div><p className="studio-eyebrow">LIVE RESULTS</p><h2>{view==="lab"?"The director’s cut":"Your films for tonight"}</h2></div><span className="studio-live"><i/>LIVE</span></div>
      <p className="studio-muted small">Match percentages are illustrative similarities calculated from eight manually estimated cinematic DNA attributes — not AI confidence, ratings or verified streaming listings.</p>
      {results.length===0?<div className="studio-empty">No matches with these constraints. Try changing the region or runtime, or reset a pass.</div>:results.map((f,i)=><article key={f.id} className="studio-film">
        <button className="studio-poster" onClick={()=>setDetails(f)} aria-label={"Details for "+f.title}><span>{f.title.slice(0,1)}</span>{f.poster&&<img src={"https://image.tmdb.org/t/p/w342/"+f.poster} alt="" loading="lazy"/>}</button>
