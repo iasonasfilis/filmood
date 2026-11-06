@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Bookmark, Check, Clapperboard, FlaskConical, Heart, RotateCcw, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import "./studio.css";
+import { interpretFilmate } from "./filmate-lite";
 import "./filmood-discovery.css";
 import "./discovery-layout.css";
 
@@ -77,7 +78,6 @@ export default function Studio(){
  const [view,setView]=useState<View>("start");
  const [moods,setMoods]=useState<string[]>([MOOD_PRESETS[1].label]);
  const [chatInput,setChatInput]=useState("");
- const [filmateLoading,setFilmateLoading]=useState(false);
  const [filmateError,setFilmateError]=useState("");
  const [chatHistory,setChatHistory]=useState<{role:"user"|"guide";text:string}[]>([]);
  const [chatTarget,setChatTarget]=useState<DNA|null>(null);
@@ -112,9 +112,7 @@ export default function Studio(){
  const launch=()=>{setMix({...target});setView("results");};
  const chooseMode=(next:Mode)=>{setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);setFilmQuery("");setView("play");};
  const chooseMood=(label:string)=>{setMoods(prev=>prev.includes(label)?(prev.length>1?prev.filter(x=>x!==label):prev):[...prev,label]);setChatTarget(null);};
- const sendChat=async()=>{const input=chatInput.trim();if(!input||filmateLoading)return;setFilmateError("");setFilmateLoading(true);const base=chatTarget|| (mode==="mood"?moodDNA:referenceDNA);let next={...base};let reply="";try{const response=await fetch("/api/filmate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:input,history:chatHistory.slice(-8),base,reference:mode==="filmood"?reference:null,moods:mode==="mood"?moods:[],catalog:FILMS.map(f=>({title:f.title,year:f.year,dna:f.dna}))})});const data=await response.json();if(!response.ok)throw new Error(data.error||"Filmate is unavailable.");next=Object.fromEntries(AXES.map(a=>[a.key,clamp(Number(data.dna?.[a.key]??base[a.key]))])) as DNA;reply=String(data.reply||"I found a cinematic direction for you.");}catch(error){setFilmateError(error instanceof Error?error.message:"Could not reach Filmate.");setFilmateLoading(false);return;}
-  setChatTarget(next);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:reply}]);setChatInput("");setMix(next);setFilmateLoading(false);setView("results");
- };
+ const sendChat=()=>{const input=chatInput.trim();if(!input)return;setFilmateError("");const base=chatTarget||(mode==="mood"?moodDNA:referenceDNA);const analysis=interpretFilmate(input,base,FILMS.map(f=>f.title),chatHistory.length);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:analysis.reply}]);setChatInput("");if(analysis.understood){setChatTarget(analysis.dna);setMix(analysis.dna);setView("results");}};
  const enterLab=(film?:Film)=>{if(film){setReference(film.title);setMix({...film.dna});setMode("filmood");}else setMix({...target});setView("lab");};
  const changeReference=(value:string)=>{setReference(value);setMix({...(REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||REFERENCES[0].dna)});};
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
@@ -162,8 +160,8 @@ export default function Studio(){
     <aside className="studio-chat-panel"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Tell FILMOOD what you're looking for</strong><small>Say anything, your way · Demo keyword interpretation, not connected to AI yet</small></div></div>
     {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
     {filmateError&&<p className="studio-filmmate-error" role="alert">{filmateError}</p>}
-    <form onSubmit={e=>{e.preventDefault();void sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Something beautiful, melancholic and a little mysterious…":"Like Arrival, but darker, stranger and more intense…"} /><button type="submit" disabled={!chatInput.trim()||filmateLoading} aria-label="Ask Filmate"><ArrowRight size={20}/></button></form>
-    <p className="studio-filmmate-note">{filmateLoading?"Filmate is thinking…":"Ask Filmate anything about what to watch. An OpenAI API key must be configured on the server for AI responses."}</p></aside></div>
+    <form onSubmit={e=>{e.preventDefault();void sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Something beautiful, melancholic and a little mysterious…":"Like Arrival, but darker, stranger and more intense…"} /><button type="submit" disabled={!chatInput.trim()} aria-label="Ask Filmate"><ArrowRight size={20}/></button></form>
+    <p className="studio-filmmate-note">Filmate Lite runs locally — no API key, no external AI. It understands selected film preferences and keywords, not unrestricted human conversation.</p></aside></div>
   </section>}
   {(view==="results"||view==="lab")&&<section className="studio-workspace">
    <div className="studio-workspace-head"><button onClick={()=>setView("play")}><ArrowLeft size={15}/> Back to discovery</button><span>{view==="lab"?"THE FILM LAB.":"YOUR DISCOVERY"}</span><button onClick={()=>enterLab()} disabled={view==="lab"}><SlidersHorizontal size={16}/> Remix</button></div>
