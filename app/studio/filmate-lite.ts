@@ -29,7 +29,7 @@ export function interpretFilmate(message:string,base:FilmateDNA,filmTitles:strin
  for(const p of patterns)for(const word of p.words){const token=norm(word);const idx=text.indexOf(token);if(idx<0)continue;const prefix=text.slice(Math.max(0,idx-35),idx);const isNegated=negation.test(prefix.slice(-38));matches.push({axis:p.axis,value:p.value,label:p.label,negated:isNegated,position:idx});break;}
  const unique=new Map<FilmateAxis,typeof matches[number]>();
  for(const match of matches.sort((a,b)=>a.position-b.position))unique.set(match.axis,match);
- for(const match of unique.values()){if(match.negated){avoided.push(match.label);result[match.axis]=Math.round(result[match.axis]*.35+(100-match.value)*.65);}else{found.push(match.label);result[match.axis]=Math.round(result[match.axis]*.2+match.value*.8);}}
+ for(const match of Array.from(unique.values())){if(match.negated){avoided.push(match.label);result[match.axis]=Math.round(result[match.axis]*.35+(100-match.value)*.65);}else{found.push(match.label);result[match.axis]=Math.round(result[match.axis]*.2+match.value*.8);}}
  const mentioned=filmTitles.find(title=>text.includes(norm(title)));
  const isQuestion=/\?|τι (να|μου)|what (should|can)|recommend|προτειν|suggest|help|βοηθ/.test(text);
  const greeting=/^(hi|hello|hey|γεια|καλησπερα|καλημερα)[!.\s]*$/.test(text);
