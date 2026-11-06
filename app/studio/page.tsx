@@ -7,7 +7,7 @@ type Axis = "dark" | "pace" | "emotion" | "mind" | "visual" | "indie" | "humor" 
 type DNA = Record<Axis, number>;
 type Film = { id:number; title:string; year:number; length:number; region:"American"|"European"|"Asian"|"World"; genres:string[]; description:string; dna:DNA; poster?:string };
 type Mode = "mood" | "filmood";
-type View = "start" | "results" | "lab";
+type View = "start" | "play" | "results" | "lab";
 const AXES: {key:Axis; name:string; low:string; high:string}[] = [
   {key:"dark",name:"Atmosphere",low:"Bright & comforting",high:"Dark & unsettling"},
   {key:"pace",name:"Pacing",low:"Slow burn",high:"Fast & kinetic"},
@@ -72,6 +72,9 @@ export default function Studio(){
  const [mode,setMode]=useState<Mode>("mood");
  const [view,setView]=useState<View>("start");
  const [mood,setMood]=useState(MOOD_PRESETS[1].label);
+ const [chatInput,setChatInput]=useState("");
+ const [chatHistory,setChatHistory]=useState<{role:"user"|"guide";text:string}[]>([]);
+ const [chatTarget,setChatTarget]=useState<DNA|null>(null);
  const [reference,setReference]=useState(defaultReference);
  const [keep,setKeep]=useState<string[]>(["Atmosphere","Emotional feeling"]);
  const [mix,setMix]=useState<DNA>({...REFERENCES[0].dna});
@@ -90,7 +93,7 @@ export default function Studio(){
  useEffect(()=>{if(loaded){try{localStorage.setItem(STORAGE,JSON.stringify({saved,watched,passed,liked,subscribed}));}catch{}}},[saved,watched,passed,liked,subscribed,loaded]);
  const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
  const moodDNA=MOOD_PRESETS.find(m=>m.label===mood)?.target||MOOD_PRESETS[1].target;
- const target=view==="lab"?mix:mode==="filmood"?referenceDNA:moodDNA;
+ const target=view==="lab"?mix:chatTarget|| (mode==="filmood"?referenceDNA:moodDNA);
  const results=useMemo(()=>FILMS.filter(f=>!passed.includes(f.id)&&!watched.includes(f.id))
   .filter(f=>mode!=="filmood"||f.title!==reference)
   .filter(f=>region==="Anywhere"||f.region===region)
@@ -98,7 +101,19 @@ export default function Studio(){
   .map(f=>({film:f,score:distance(f,target)+(liked.includes(f.id)?-16:0)+((depth-50)/50)*(f.dna.indie-50)*-.35}))
   .sort((a,b)=>a.score-b.score||a.film.id-b.film.id).slice(0,3).map(x=>x.film),
   [mode,reference,region,runtime,depth,passed,watched,liked,target]);
- const launch=()=>{setMix({...(mode==="mood"?moodDNA:referenceDNA)});setView("results");};
+ const launch=()=>{setMix({...target});setView("results");};
+ const chooseMode=(next:Mode)=>{setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);setView("play");};
+ const chooseMood=(label:string)=>{setMood(label);setChatTarget(MOOD_PRESETS.find(x=>x.label===label)?.target||null);};
+ const sendChat=()=>{const input=chatInput.trim();if(!input)return;const q=input.toLowerCase();const base=chatTarget|| (mode==="mood"?moodDNA:referenceDNA);const next={...base};
+  if(/dark|σκοτειν|horror|τρομακ|unsettling/.test(q))next.dark=90;
+  if(/funny|laugh|κωμωδ|αστει|γελα/.test(q)){next.humor=94;next.dark=25;}
+  if(/cry|sad|emotional|κλαψ|συγκιν|λυπη/.test(q))next.emotion=96;
+  if(/mystery|twist|μυστηρ|ανατροπ|mind/.test(q))next.mind=94;
+  if(/fast|action|εντασ|δρασ|γρηγορ/.test(q)){next.pace=86;next.action=87;}
+  if(/slow|quiet|ηρεμ|αργ|χαλαρ/.test(q)){next.pace=22;next.action=12;}
+  if(/beautiful|visual|εικον|ατμοσφαιρ/.test(q))next.visual=95;
+  setChatTarget(next);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:"I adjusted your cinematic profile using the words you gave me. Explore the matches, or tell me what to change."}]);setChatInput("");setMix(next);setView("results");
+ };
  const enterLab=(film?:Film)=>{if(film){setReference(film.title);setMix({...film.dna});setMode("filmood");}else setMix({...target});setView("lab");};
  const changeReference=(value:string)=>{setReference(value);setMix({...(REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||REFERENCES[0].dna)});};
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
@@ -122,20 +137,28 @@ export default function Studio(){
    <div className="studio-cinema-backdrop" aria-hidden="true"/>
    <p className="studio-eyebrow">FILMOOD ORIGINAL DISCOVERY EXPERIENCE</p>
    <h1>Some feelings deserve<br/><em>another film.</em></h1>
-   <p className="studio-lead">You don't need to know what to watch. Just know how you feel — or remember how another film made you feel.</p>
+   <p className="studio-lead">A cinematic experience built around what moves you. Pick a direction. The discovery begins on the next screen.</p>
    <p className="studio-feature-label">CHOOSE YOUR WAY IN <span>01 / 03</span></p>
    <div className="studio-mode-grid">
-    <button className={mode==="mood"?"studio-mode selected":"studio-mode"} onClick={()=>setMode("mood")}><Heart size={26}/><strong>MOOD.</strong><span>How do you want to feel?</span></button>
-    <button className={mode==="filmood"?"studio-mode selected":"studio-mode"} onClick={()=>setMode("filmood")}><Clapperboard size={26}/><strong>FILMOOD.</strong><span>Remember a film. Find the feeling.</span></button>
+    <button className="studio-mode" onClick={()=>chooseMode("mood")}><Heart size={27}/><strong>MOOD.</strong><span>Start with a feeling. Discover where it takes you.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
+    <button className="studio-mode" onClick={()=>chooseMode("filmood")}><Clapperboard size={27}/><strong>FILMOOD.</strong><span>Start with a film. Follow its emotional aftertaste.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
    </div>
-   {mode==="mood"?<div className="studio-quick"><h2>Tonight, I want something that will...</h2><div className="studio-chips">{MOOD_PRESETS.map(m=><button key={m.label} className={mood===m.label?"chosen":""} onClick={()=>setMood(m.label)}>{m.label}</button>)}</div></div>
-    :<div className="studio-quick"><h2>What film or series gave you that feeling?</h2><select aria-label="Reference film" value={reference} onChange={e=>changeReference(e.target.value)}>{REFERENCES.map(r=><option key={r.name}>{r.name}</option>)}</select><p>Not a genre search. We'll explore the tone, atmosphere and emotional aftertaste you remember.</p><div className="studio-chips">{["Atmosphere","Emotional feeling","Storytelling","Visuals","Characters"].map(v=><button key={v} className={keep.includes(v)?"chosen":""} onClick={()=>setKeep(a=>a.includes(v)?a.filter(x=>x!==v):[...a,v])}>{keep.includes(v)?"✓ ":""}{v}</button>)}</div></div>}
-   <div className="studio-launch"><button className="studio-primary" onClick={launch}>Find my film <ArrowRight size={18}/></button><span>No account needed · Exploratory prototype</span></div>
-   <div className="studio-cinema-caption"><span>CURATED BY FEELING, NOT BY GENRE</span><span>THE CINEMA IS YOURS TO EXPLORE</span></div>
-   <button className="studio-teaser" onClick={()=>enterLab()}><FlaskConical size={19}/><span><strong>Feeling cinephile today?</strong><small>Mix the DNA of your perfect film in The Film Lab.</small></span><ArrowRight size={17}/></button>
+   <button className="studio-teaser" onClick={()=>enterLab()}><FlaskConical size={20}/><span><strong>The Film Lab.</strong><small>Mix your cinematic DNA. Make something unexpected.</small></span><ArrowRight size={18}/></button>
   </section>}
-  {view!=="start"&&<section className="studio-workspace">
-   <div className="studio-workspace-head"><button onClick={()=>setView("start")}><ArrowLeft size={15}/> Back</button><span>{view==="lab"?"THE FILM LAB.":"YOUR DISCOVERY"}</span><button onClick={()=>enterLab()} disabled={view==="lab"}><SlidersHorizontal size={16}/> Remix</button></div>
+  {view==="play"&&<section className="studio-play">
+    <button className="studio-back-link" onClick={()=>setView("start")}><ArrowLeft size={16}/> Choose another experience</button>
+    <p className="studio-eyebrow">{mode==="mood"?"01 / MOOD.":"02 / FILMOOD."} — YOUR CINEMATIC PLAYGROUND</p>
+    <h1>{mode==="mood"?"What does tonight feel like?":"A film is never just a film."}</h1>
+    <p className="studio-play-intro">{mode==="mood"?"Choose a visual atmosphere or describe what you're craving. No questionnaire.":"Pick a film that stayed with you. Then tell us what you want to feel again — or just discover."}</p>
+    {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} className={"studio-visual-mood mood-"+i+(mood===m.label?" chosen":"")} onClick={()=>chooseMood(m.label)}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{mood===m.label?"SELECTED":"EXPLORE THIS FEELING"} <ArrowRight size={14}/></span></button>)}</div>
+    :<div className="studio-film-picker"><label htmlFor="studio-reference">YOUR STARTING FILM OR SERIES</label><select id="studio-reference" value={reference} onChange={e=>{changeReference(e.target.value);setChatTarget(null);}}>{REFERENCES.map(r=><option key={r.name}>{r.name}</option>)}</select><p>From {reference}, we'll look beyond genre and plot.</p></div>}
+    <div className="studio-chat-panel"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Tell FILMOOD what you're looking for</strong><small>Optional · Prototype keyword interpretation, not connected to ChatGPT yet</small></div></div>
+    {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
+    <form onSubmit={e=>{e.preventDefault();sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Something beautiful, melancholic and a little mysterious…":"Like Arrival, but darker, stranger and more intense…"} /><button type="submit" disabled={!chatInput.trim()} aria-label="Find films from description"><ArrowRight size={20}/></button></form>
+    <div className="studio-play-actions"><button className="studio-primary" onClick={launch}>Discover films <ArrowRight size={18}/></button><span>Or use the text above to shape your recommendations.</span></div></div>
+  </section>}
+  {(view==="results"||view==="lab")&&<section className="studio-workspace">
+   <div className="studio-workspace-head"><button onClick={()=>setView("play")}><ArrowLeft size={15}/> Back to discovery</button><span>{view==="lab"?"THE FILM LAB.":"YOUR DISCOVERY"}</span><button onClick={()=>enterLab()} disabled={view==="lab"}><SlidersHorizontal size={16}/> Remix</button></div>
    <div className={view==="lab"?"studio-columns lab":"studio-columns"}>
     <section className="studio-controls">
      {view==="lab"?<>
@@ -144,7 +167,7 @@ export default function Studio(){
        <div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
      </>:<>
        <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."}</p><h1>We found your kind of films.</h1><p className="studio-muted">{mode==="mood"?"A few picks for the feeling you're after.":"Inspired by "+reference+" and its emotional signature."}</p>
-       <div className="studio-summary"><span>{mode==="mood"?mood:"Inspired by "+reference}</span><button onClick={()=>setView("start")}>Change</button></div>
+       <div className="studio-summary"><span>{mode==="mood"?mood:"Inspired by "+reference}</span><button onClick={()=>setView("play")}>Change</button></div>
        <button className="studio-lab-invite" onClick={()=>enterLab()}><FlaskConical size={19}/> These are close. Want to experiment? <ArrowRight size={16}/></button>
      </>}
      <div className="studio-more">
