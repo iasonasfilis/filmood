@@ -135,3 +135,8 @@
 .studio-columns.lab .studio-film:hover{border-color:#e8bda388;transform:translateY(-2px)}
 @media(max-width:1050px){.studio-columns.lab{grid-template-columns:1fr}.studio-lab-banner{min-height:0}.studio-columns.lab .studio-sliders{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:540px){.studio-lab-banner{padding:32px 20px}.studio-lab-steps{gap:13px}.studio-columns.lab .studio-sliders{grid-template-columns:1fr}}
+
+.studio-match-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.studio-match-score{display:inline-flex;align-items:baseline;gap:7px;padding:7px 11px;border:1px solid #eac5a25a;background:#eac5a214;border-radius:6px;color:#f6d4b9;white-space:nowrap}
+.studio-match-score strong{font:400 25px Georgia,serif;letter-spacing:-.04em}
+.studio-match-score small{font-size:9px;letter-spacing:1.2px;font-weight:700;color:#c8aeb2}
