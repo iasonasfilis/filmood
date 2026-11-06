@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Bookmark, Check, Clapperboard, FlaskConical, Heart, RotateCcw, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import "./studio.css";
 import "./filmood-discovery.css";
+import "./discovery-layout.css";
 
 type Axis = "dark" | "pace" | "emotion" | "mind" | "visual" | "indie" | "humor" | "action";
 type DNA = Record<Axis, number>;
@@ -156,7 +157,8 @@ export default function Studio(){
       <div className="studio-filmood-search"><label htmlFor="studio-film-search">SEARCH A FILM · LIVE POSTER RESULTS</label><input id="studio-film-search" value={filmQuery} onChange={e=>setFilmQuery(e.target.value)} placeholder="Type a film title…" autoComplete="off"/><p>Search the 23-film demo catalog. Choose a poster to change your starting film.</p></div>
       <div className="studio-filmood-six">{filmSuggestions.map((f,i)=><button key={f.id} className="studio-filmood-tile" onClick={()=>{changeReference(f.title);setFilmQuery("");setChatTarget(null);}} aria-label={"Find films inspired by "+f.title}><div className="studio-filmood-art">{f.poster?<img src={"https://image.tmdb.org/t/p/w500/"+f.poster} alt="" loading="lazy"/>:<span>{f.title.slice(0,1)}</span>}<small>{String(i+1).padStart(2,"0")}</small></div><strong>{f.title}</strong><span>{f.year} · {matchPercentage(f,referenceDNA)}% DNA</span></button>)}</div>
      </div>}
-    {mode==="mood"&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} {moods.length>1?"×":"✓"}</button>)}</div><small>Every selected mood contributes equally to the cinematic DNA used for recommendations.</small></div>}\n    <div className="studio-play-actions"><button className="studio-primary" onClick={launch}>Discover films <ArrowRight size={18}/></button></div></div>
+    {mode==="mood"&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} {moods.length>1?"×":"✓"}</button>)}</div><small>Every selected mood contributes equally to the cinematic DNA used for recommendations.</small></div>}
+    <div className="studio-play-actions"><button className="studio-primary" onClick={launch}>Discover films <ArrowRight size={18}/></button></div></div>
     <aside className="studio-chat-panel"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Tell FILMOOD what you're looking for</strong><small>Say anything, your way · Demo keyword interpretation, not connected to AI yet</small></div></div>
     {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
     {filmateError&&<p className="studio-filmmate-error" role="alert">{filmateError}</p>}
