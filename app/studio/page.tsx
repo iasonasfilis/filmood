@@ -159,12 +159,13 @@ export default function Studio(){
   </section>}
   {(view==="results"||view==="lab")&&<section className="studio-workspace">
    <div className="studio-workspace-head"><button onClick={()=>setView("play")}><ArrowLeft size={15}/> Back to discovery</button><span>{view==="lab"?"THE FILM LAB.":"YOUR DISCOVERY"}</span><button onClick={()=>enterLab()} disabled={view==="lab"}><SlidersHorizontal size={16}/> Remix</button></div>
+   {view==="lab"&&<div className="studio-lab-banner"><span>THE FILM LAB / EXPERIMENT NO. 001</span><h2>Rewrite the feeling.<br/><em>Keep the magic.</em></h2><p>Eight cinematic ingredients. Endless ways to change the atmosphere. Drag, remix, discover.</p><div className="studio-lab-steps"><span>01 · CHOOSE A FILM</span><span>02 · REMIX ITS DNA</span><span>03 · DISCOVER YOUR CUT</span></div></div>}
    <div className={view==="lab"?"studio-columns lab":"studio-columns"}>
     <section className="studio-controls">
      {view==="lab"?<>
-       <p className="studio-eyebrow">FILMOOD. PRESENTS</p><h1>The Film Lab.</h1><p className="studio-muted">Feeling cinephile today? Move a slider. Watch the recommendations change instantly.</p>
+       <p className="studio-eyebrow">THE MIXING DESK</p><h1>Your cinematic recipe.</h1><p className="studio-muted">Change the ingredients. The film selection responds as you experiment.</p>
        <div className="studio-base"><label htmlFor="base-film">YOUR BASE RECIPE</label><select id="base-film" value={reference} onChange={e=>changeReference(e.target.value)}>{[...REFERENCES.map(r=>r.name),...FILMS.map(f=>f.title).filter(name=>!REFERENCES.some(r=>r.name===name))].map(name=><option key={name}>{name}</option>)}</select><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
-       <div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
+       <div className="studio-lab-meter"><span>YOUR CURRENT MIX</span><strong>{Math.round(AXES.reduce((n,a)=>n+mix[a.key],0)/AXES.length)}<small> / 100</small></strong><p>Average intensity across your eight ingredients</p></div><div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
      </>:<>
        <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."}</p><h1>We found your kind of films.</h1><p className="studio-muted">{mode==="mood"?"A few picks for the feeling you're after.":"Inspired by "+reference+" and its emotional signature."}</p>
        <div className="studio-summary"><span>{mode==="mood"?mood:"Inspired by "+reference}</span><button onClick={()=>setView("play")}>Change</button></div>
@@ -178,7 +179,7 @@ export default function Studio(){
      </div>
     </section>
     <section className="studio-results">
-     <div className="studio-row"><div><p className="studio-eyebrow">LIVE RESULTS</p><h2>{view==="lab"?"Your live mix":"Your films for tonight"}</h2></div><span className="studio-live"><i/>LIVE</span></div>
+     <div className="studio-row"><div><p className="studio-eyebrow">LIVE RESULTS</p><h2>{view==="lab"?"The director’s cut":"Your films for tonight"}</h2></div><span className="studio-live"><i/>LIVE</span></div>
      <p className="studio-muted small">Ranked instantly from illustrative attributes. These aren't verified AI predictions or streaming listings.</p>
      {results.length===0?<div className="studio-empty">No matches with these constraints. Try changing the region or runtime, or reset a pass.</div>:results.map((f,i)=><article key={f.id} className="studio-film">
        <button className="studio-poster" onClick={()=>setDetails(f)} aria-label={"Details for "+f.title}><span>{f.title.slice(0,1)}</span>{f.poster&&<img src={"https://image.tmdb.org/t/p/w342/"+f.poster} alt="" loading="lazy"/>}</button>
