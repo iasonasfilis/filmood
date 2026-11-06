@@ -30,3 +30,40 @@
 .studio-axis input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#e2c7f3;border:2px solid #2c1f35}
 .studio-film-actions button:hover,.studio-chips button:hover{border-color:#bd91d8;background:#483252}
 @media(prefers-reduced-motion:reduce){.studio *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Design B — immersive cinema, with the existing discovery interactions intact */
+.studio{background:#090a0d;color:#f7f5f0;font-family:Arial,Helvetica,sans-serif}
+.studio-nav{position:relative;z-index:5;background:#08090de8;border-bottom:1px solid #ffffff20;backdrop-filter:blur(16px);padding:23px max(5vw,24px)}
+.studio-word{font-size:24px;letter-spacing:3px}
+.studio-word span{color:#dfb9ff}
+.studio-nav nav button{font-size:12px;letter-spacing:.07em;text-transform:uppercase}
+.studio-hero{position:relative;isolation:isolate;max-width:none;text-align:left;margin:0;padding:clamp(88px,12vw,190px) max(6vw,24px) 65px;min-height:930px;overflow:hidden;background:#0d0d10}
+.studio-cinema-backdrop{position:absolute;inset:0 0 auto;height:730px;z-index:-2;background-image:linear-gradient(90deg,#09090df5 0%,#09090dbb 35%,#09090d45 75%,#09090d55 100%),linear-gradient(0deg,#09090d 0%,transparent 42%),url("https://image.tmdb.org/t/p/original/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg");background-position:center,center,center 35%;background-size:cover;filter:saturate(.8)}
+.studio-hero:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 75% 10%,#c58d4933,transparent 50%),linear-gradient(180deg,transparent 40%,#09090d 77%)}
+.studio-hero>.studio-eyebrow{font-size:11px;letter-spacing:3px;color:#efceae;margin:0 0 18px}
+.studio-hero h1{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(48px,7.4vw,116px);line-height:.99;letter-spacing:-.055em;margin:0 0 26px;max-width:1020px;text-wrap:balance;text-shadow:0 6px 35px #0007}
+.studio-hero h1 em{font-family:Georgia,'Times New Roman',serif;color:#f6d6bc;font-weight:400}
+.studio-lead{margin:0 0 90px;max-width:560px;font-size:clamp(15px,1.5vw,19px);line-height:1.7;color:#e1d8d0}
+.studio-feature-label{max-width:1120px;margin:0 auto 17px;display:flex;justify-content:space-between;color:#e4c6b1;letter-spacing:2.5px;font-size:10px;font-weight:700}
+.studio-feature-label span{color:#9e9496}
+.studio-mode-grid{max-width:1120px;gap:16px;grid-template-columns:1fr 1fr}
+.studio-mode{min-height:230px;padding:30px;background:linear-gradient(135deg,#ffffff19,#ffffff08);border:1px solid #ffffff39;backdrop-filter:blur(22px);border-radius:9px;transition:transform .2s,background .2s,border-color .2s}
+.studio-mode:hover{transform:translateY(-5px);background:#ffffff22}
+.studio-mode.selected{background:linear-gradient(135deg,#75555e80,#ffffff14);border-color:#f3c5b8}
+.studio-mode strong{font-family:Georgia,serif;font-weight:400;font-size:clamp(31px,3vw,45px);letter-spacing:-1px}
+.studio-mode span{font-size:14px;color:#d9d1cf}
+.studio-mode svg{color:#f4cdb8}
+.studio-quick{max-width:1120px;background:#161519d9;border:1px solid #ffffff25;border-radius:9px;padding:28px;margin:18px auto}
+.studio-quick h2{font-family:Georgia,serif;font-weight:400;font-size:23px;margin-top:0}
+.studio-chips button{background:#ffffff0c;border:1px solid #ffffff35;border-radius:4px;color:#eee7e4;padding:12px 17px;font-size:13px}
+.studio-chips button.chosen{background:#d5a8a04d;border-color:#f4cdb8}
+.studio-primary{background:#f2d6c1;color:#191219;border-radius:4px;padding:16px 30px}
+.studio-launch{margin:28px auto 0}
+.studio-cinema-caption{max-width:1120px;display:flex;justify-content:space-between;margin:35px auto 0;color:#8c858b;letter-spacing:2px;font-size:10px}
+.studio-teaser{max-width:1120px;margin:18px auto 0;border-radius:6px;background:#1d1b20;border-color:#ffffff2e;padding:23px}
+.studio-teaser strong{font-family:Georgia,serif;font-size:22px;font-weight:400}
+.studio-workspace{max-width:1450px}
+.studio-film{background:#17151a;border-color:#ffffff24;border-radius:8px}
+.studio-results h2,.studio-controls h1{font-family:Georgia,serif;font-weight:400}
+.studio-poster{border-radius:4px}
+@media(max-width:700px){.studio-hero{padding:100px 20px 45px;min-height:0}.studio-cinema-backdrop{height:560px;background-position:center,center,65% center}.studio-hero h1{font-size:clamp(45px,11vw,75px)}.studio-lead{margin-bottom:65px}.studio-mode-grid{grid-template-columns:1fr}.studio-mode{min-height:165px}.studio-cinema-caption{gap:15px;font-size:8px}.studio-feature-label{font-size:9px}.studio-nav{padding:17px 15px}.studio-nav nav{gap:8px}.studio-nav nav button{font-size:10px}}
