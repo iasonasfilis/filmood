@@ -76,7 +76,7 @@ const readable=(key:Axis,film:Film)=>AXES.find(a=>a.key===key)!.name.toLowerCase
 export default function Studio(){
  const [mode,setMode]=useState<Mode>("mood");
  const [view,setView]=useState<View>("start");
- const [moods,setMoods]=useState<string[]>([MOOD_PRESETS[1].label]);
+ const [moods,setMoods]=useState<string[]>([]);
  const [chatInput,setChatInput]=useState("");
  const [filmateError,setFilmateError]=useState("");
  const [chatHistory,setChatHistory]=useState<{role:"user"|"guide";text:string}[]>([]);
@@ -99,7 +99,7 @@ export default function Studio(){
  useEffect(()=>{try{const s=localStorage.getItem(STORAGE);if(s){const p=JSON.parse(s);if(Array.isArray(p.saved))setSaved(p.saved);if(Array.isArray(p.watched))setWatched(p.watched);if(Array.isArray(p.passed))setPassed(p.passed);if(Array.isArray(p.liked))setLiked(p.liked);if(Array.isArray(p.subscribed))setSubscribed(p.subscribed);}}catch{}setLoaded(true);},[]);
  useEffect(()=>{if(loaded){try{localStorage.setItem(STORAGE,JSON.stringify({saved,watched,passed,liked,subscribed}));}catch{}}},[saved,watched,passed,liked,subscribed,loaded]);
  const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
- const moodDNA=AXES.reduce((acc,axis)=>{const selected=MOOD_PRESETS.filter(m=>moods.includes(m.label));acc[axis.key]=Math.round(selected.reduce((sum,m)=>sum+m.target[axis.key],0)/(selected.length||1));return acc;},{} as DNA);
+ const moodDNA=AXES.reduce((acc,axis)=>{const selected=MOOD_PRESETS.filter(m=>moods.includes(m.label));acc[axis.key]=selected.length?Math.round(selected.reduce((sum,m)=>sum+m.target[axis.key],0)/selected.length):50;return acc;},{} as DNA);
  const target=view==="lab"?mix:chatTarget|| (mode==="filmood"?referenceDNA:moodDNA);
  const results=useMemo(()=>FILMS.filter(f=>!passed.includes(f.id)&&!watched.includes(f.id))
   .filter(f=>mode!=="filmood"||f.title!==reference)
@@ -109,10 +109,10 @@ export default function Studio(){
   .sort((a,b)=>matchPercentage(b.film,target)-matchPercentage(a.film,target)||a.score-b.score||a.film.id-b.film.id).slice(0,6).map(x=>x.film),
   [mode,reference,region,runtime,depth,passed,watched,liked,target]);
  const filmSuggestions=useMemo(()=>{const q=filmQuery.trim().toLowerCase();const pool=FILMS.filter(f=>f.title!==reference);return pool.map(f=>({film:f,score:distance(f,referenceDNA)})).sort((a,b)=>{if(q){const aMatch=a.film.title.toLowerCase().includes(q)?0:1;const bMatch=b.film.title.toLowerCase().includes(q)?0:1;if(aMatch!==bMatch)return aMatch-bMatch;}return matchPercentage(b.film,referenceDNA)-matchPercentage(a.film,referenceDNA)||a.film.id-b.film.id;}).slice(0,6).map(x=>x.film);},[filmQuery,reference,referenceDNA]);
- const launch=()=>{setMix({...target});setView("results");};
- const chooseMode=(next:Mode)=>{setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);setFilmQuery("");setView("play");};
- const chooseMood=(label:string)=>{setMoods(prev=>prev.includes(label)?(prev.length>1?prev.filter(x=>x!==label):prev):[...prev,label]);setChatTarget(null);};
- const sendChat=()=>{const input=chatInput.trim();if(!input)return;setFilmateError("");const base=chatTarget||(mode==="mood"?moodDNA:referenceDNA);const analysis=interpretFilmate(input,base,FILMS.map(f=>f.title),chatHistory.length);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:analysis.reply}]);setChatInput("");if(analysis.understood){setChatTarget(analysis.dna);setMix(analysis.dna);setView("results");}};
+ const launch=()=>{if(mode==="mood"&&moods.length===0&&!chatTarget)return;setMix({...target});setView("results");};
+ const chooseMode=(next:Mode)=>{if(next==="mood")setMoods([]);setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);setFilmQuery("");setView("play");};
+ const chooseMood=(label:string)=>{setMoods(prev=>prev.includes(label)?(prev.filter(x=>x!==label)):[...prev,label]);setChatTarget(null);};
+ const sendChat=()=>{const input=chatInput.trim();if(!input)return;setFilmateError("");const base=chatTarget||(mode==="mood"?moodDNA:referenceDNA);const analysis=interpretFilmate(input,base,FILMS.map(f=>f.title),chatHistory.length);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:analysis.reply}]);setChatInput("");setChatTarget(analysis.dna);setMix(analysis.dna);setView("results");};
  const enterLab=(film?:Film)=>{if(film){setReference(film.title);setMix({...film.dna});setMode("filmood");}else setMix({...target});setView("lab");};
  const changeReference=(value:string)=>{setReference(value);setMix({...(REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||REFERENCES[0].dna)});};
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
@@ -152,11 +152,11 @@ export default function Studio(){
     <div className="studio-discovery-columns"><div className="studio-discovery-primary">{mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"ADD TO YOUR MIX"} <ArrowRight size={14}/></span></button>)}</div>
     :<div className="studio-filmood-discovery">
       <div className="studio-filmood-top"><div><span>YOUR CINEMATIC STARTING POINT</span><h2>Six films. One feeling.</h2><p>Inspired by <strong>{reference}</strong>. Ordered by DNA match.</p></div><span className="studio-six-count">06 / FILMS</span></div>
-      <div className="studio-filmood-search"><label htmlFor="studio-film-search">SEARCH A FILM · LIVE POSTER RESULTS</label><input id="studio-film-search" value={filmQuery} onChange={e=>setFilmQuery(e.target.value)} placeholder="Type a film title…" autoComplete="off"/><p>Search the 23-film demo catalog. Choose a poster to change your starting film.</p></div>
+      <form className="studio-filmood-search" onSubmit={e=>{e.preventDefault();const found=FILMS.find(f=>f.title.toLowerCase()===filmQuery.trim().toLowerCase())||FILMS.find(f=>f.title.toLowerCase().includes(filmQuery.trim().toLowerCase()));if(found&&filmQuery.trim()){changeReference(found.title);setFilmQuery("");setChatTarget(null);setView("results");}}}><label htmlFor="studio-film-search">SEARCH A FILM · LIVE POSTER RESULTS</label><input id="studio-film-search" value={filmQuery} onChange={e=>setFilmQuery(e.target.value)} placeholder="Type a film title… Press Enter" autoComplete="off"/><p>Search the 23-film demo catalog. Choose a poster or press Enter to discover films inspired by the first matching title.</p></form>
       <div className="studio-filmood-six">{filmSuggestions.map((f,i)=><button key={f.id} className="studio-filmood-tile" onClick={()=>{changeReference(f.title);setFilmQuery("");setChatTarget(null);}} aria-label={"Find films inspired by "+f.title}><div className="studio-filmood-art">{f.poster?<img src={"https://image.tmdb.org/t/p/w500/"+f.poster} alt="" loading="lazy"/>:<span>{f.title.slice(0,1)}</span>}<small>{String(i+1).padStart(2,"0")}</small></div><strong>{f.title}</strong><span>{f.year} · {matchPercentage(f,referenceDNA)}% DNA</span></button>)}</div>
      </div>}
     {mode==="mood"&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} {moods.length>1?"×":"✓"}</button>)}</div><small>Every selected mood contributes equally to the cinematic DNA used for recommendations.</small></div>}
-    <div className="studio-play-actions"><button className="studio-primary" onClick={launch}>Discover films <ArrowRight size={18}/></button></div></div>
+    <div className="studio-play-actions"><button className="studio-primary" disabled={mode==="mood"&&moods.length===0&&!chatTarget} onClick={launch}>Discover films <ArrowRight size={18}/></button></div></div>
     <aside className="studio-chat-panel"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Tell FILMOOD what you're looking for</strong><small>Say anything, your way · Demo keyword interpretation, not connected to AI yet</small></div></div>
     {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
     {filmateError&&<p className="studio-filmmate-error" role="alert">{filmateError}</p>}
