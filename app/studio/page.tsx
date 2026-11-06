@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowRight, Bookmark, Check, Clapperboard, FlaskConical, Heart, RotateCcw, SlidersHorizontal, Sparkles, X } from "lucide-react";
 import "./studio.css";
 import { interpretFilmate } from "./filmate-lite";
@@ -96,6 +96,8 @@ export default function Studio(){
  const [providerOpen,setProviderOpen]=useState(false);
  const [details,setDetails]=useState<Film|null>(null);
  const [loaded,setLoaded]=useState(false);
+ // A new discovery screen must start at its top, not inherit the previous scroll position.
+ useLayoutEffect(()=>{window.scrollTo({top:0,left:0,behavior:"instant"});},[view]);
  useEffect(()=>{try{const s=localStorage.getItem(STORAGE);if(s){const p=JSON.parse(s);if(Array.isArray(p.saved))setSaved(p.saved);if(Array.isArray(p.watched))setWatched(p.watched);if(Array.isArray(p.passed))setPassed(p.passed);if(Array.isArray(p.liked))setLiked(p.liked);if(Array.isArray(p.subscribed))setSubscribed(p.subscribed);}}catch{}setLoaded(true);},[]);
  useEffect(()=>{if(loaded){try{localStorage.setItem(STORAGE,JSON.stringify({saved,watched,passed,liked,subscribed}));}catch{}}},[saved,watched,passed,liked,subscribed,loaded]);
  const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
