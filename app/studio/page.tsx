@@ -88,7 +88,7 @@ export default function Studio(){
  const [loaded,setLoaded]=useState(false);
  useEffect(()=>{try{const s=localStorage.getItem(STORAGE);if(s){const p=JSON.parse(s);if(Array.isArray(p.saved))setSaved(p.saved);if(Array.isArray(p.watched))setWatched(p.watched);if(Array.isArray(p.passed))setPassed(p.passed);if(Array.isArray(p.liked))setLiked(p.liked);if(Array.isArray(p.subscribed))setSubscribed(p.subscribed);}}catch{}setLoaded(true);},[]);
  useEffect(()=>{if(loaded){try{localStorage.setItem(STORAGE,JSON.stringify({saved,watched,passed,liked,subscribed}));}catch{}}},[saved,watched,passed,liked,subscribed,loaded]);
- const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||REFERENCES[0].dna;
+ const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
  const moodDNA=MOOD_PRESETS.find(m=>m.label===mood)?.target||MOOD_PRESETS[1].target;
  const target=view==="lab"?mix:mode==="filmood"?referenceDNA:moodDNA;
  const results=useMemo(()=>FILMS.filter(f=>!passed.includes(f.id)&&!watched.includes(f.id))
@@ -98,9 +98,9 @@ export default function Studio(){
   .map(f=>({film:f,score:distance(f,target)+(liked.includes(f.id)?-16:0)+((depth-50)/50)*(f.dna.indie-50)*-.35}))
   .sort((a,b)=>a.score-b.score||a.film.id-b.film.id).slice(0,3).map(x=>x.film),
   [mode,reference,region,runtime,depth,passed,watched,liked,target]);
- const launch=()=>{setMix({...mode==="mood"?moodDNA:referenceDNA});setView("results");};
+ const launch=()=>{setMix({...(mode==="mood"?moodDNA:referenceDNA)});setView("results");};
  const enterLab=(film?:Film)=>{if(film){setReference(film.title);setMix({...film.dna});setMode("filmood");}else setMix({...target});setView("lab");};
- const changeReference=(value:string)=>{setReference(value);setMix({...REFERENCES.find(r=>r.name===value)!.dna});};
+ const changeReference=(value:string)=>{setReference(value);setMix({...(REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||REFERENCES[0].dna)});};
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
  const reset=()=>{setMix({...referenceDNA});setRegion("Anywhere");setRuntime("Any length");setDepth(52);};
  const sharedReason=(f:Film)=>{const closer=AXES.map(a=>({key:a.key,name:readable(a.key,f),delta:Math.abs(f.dna[a.key]-target[a.key])})).sort((a,b)=>a.delta-b.delta).slice(0,2).map(a=>a.name).join(" and ");return "Close to your selected "+closer+" preferences. "+f.description;};
@@ -137,7 +137,7 @@ export default function Studio(){
     <section className="studio-controls">
      {view==="lab"?<>
        <p className="studio-eyebrow">FILMOOD. PRESENTS</p><h1>The Film Lab.</h1><p className="studio-muted">Feeling cinephile today? Move a slider. Watch the recommendations change instantly.</p>
-       <div className="studio-base"><label htmlFor="base-film">YOUR BASE RECIPE</label><select id="base-film" value={REFERENCES.some(r=>r.name===reference)?reference:defaultReference} onChange={e=>changeReference(e.target.value)}>{REFERENCES.map(r=><option key={r.name}>{r.name}</option>)}</select><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
+       <div className="studio-base"><label htmlFor="base-film">YOUR BASE RECIPE</label><select id="base-film" value={reference} onChange={e=>changeReference(e.target.value)}>{[...REFERENCES.map(r=>r.name),...FILMS.map(f=>f.title).filter(name=>!REFERENCES.some(r=>r.name===name))].map(name=><option key={name}>{name}</option>)}</select><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
        <div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
      </>:<>
        <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."}</p><h1>We found your kind of films.</h1><p className="studio-muted">{mode==="mood"?"A few picks for the feeling you're after.":"Inspired by "+reference+" and its emotional signature."}</p>
