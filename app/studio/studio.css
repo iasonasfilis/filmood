@@ -103,3 +103,35 @@
 .studio-play-actions{display:flex;align-items:center;gap:20px;margin-top:20px}.studio-play-actions span{font-size:12px;color:#a69da8}
 @media(max-width:800px){.studio-visual-moods{grid-template-columns:repeat(2,minmax(0,1fr))}.studio-visual-mood{min-height:200px}}
 @media(max-width:520px){.studio-visual-moods{grid-template-columns:1fr 1fr;gap:9px}.studio-visual-mood{min-height:175px;padding:13px}.studio-visual-mood strong{font-size:23px}.studio-play-actions{align-items:flex-start;flex-direction:column}.studio-chat-panel{padding:15px}.studio-chat-top small{line-height:1.4}}
+
+/* Film Lab 2.0: editorial experimentation, not a settings form */
+.studio-workspace{max-width:1480px;padding:22px max(3vw,18px) 100px}
+.studio-lab-banner{position:relative;isolation:isolate;overflow:hidden;min-height:330px;padding:55px clamp(24px,5vw,76px);border-radius:12px;margin:24px 0 28px;border:1px solid #ffffff29;background:linear-gradient(90deg,#09090df7,#171019cc 55%,#13101766),url("https://images.unsplash.com/photo-1485846234645-a62644f84728?w=1600&q=85") center/cover}
+.studio-lab-banner>span{font-size:11px;letter-spacing:3px;color:#f0c5a8}
+.studio-lab-banner h2{font:400 clamp(40px,5vw,78px)/1.04 Georgia,serif;letter-spacing:-.045em;margin:22px 0 16px}
+.studio-lab-banner h2 em{color:#e9bca7;font-weight:400}
+.studio-lab-banner>p{max-width:570px;color:#d7c8c9;line-height:1.6;font-size:15px}
+.studio-lab-steps{display:flex;gap:30px;flex-wrap:wrap;margin-top:32px;color:#c9b5ba;font-size:10px;letter-spacing:1.5px}
+.studio-columns.lab{grid-template-columns:minmax(320px,.92fr) minmax(0,1.35fr);gap:28px;align-items:start}
+.studio-columns.lab .studio-controls{border:1px solid #ffffff24;background:linear-gradient(145deg,#201b24,#111117);border-radius:12px;padding:clamp(20px,2.5vw,35px)}
+.studio-columns.lab .studio-controls h1{font:400 clamp(28px,3vw,42px)/1.1 Georgia,serif;margin:14px 0}
+.studio-columns.lab .studio-base{border:1px solid #ffffff24;border-radius:9px;padding:20px;background:#ffffff08;margin:26px 0 22px}
+.studio-columns.lab .studio-base label{color:#d8b6ae;letter-spacing:2px}
+.studio-columns.lab .studio-base select{width:100%;background:#18141c;border:1px solid #ffffff40;padding:13px;border-radius:5px;color:#fff;margin:12px 0}
+.studio-columns.lab .studio-base button{border:1px solid #ffffff33;border-radius:5px;padding:9px 15px}
+.studio-lab-meter{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:18px 20px;margin:15px 0 22px;border:1px solid #e8bfa13b;background:linear-gradient(90deg,#b68a6a20,#ad8bb01a);border-radius:8px}
+.studio-lab-meter span{font-size:11px;letter-spacing:2px;color:#e6c3b4}
+.studio-lab-meter strong{font:400 36px Georgia,serif;color:#f2d1bb}
+.studio-lab-meter small{font:12px Arial,sans-serif;color:#aaa}
+.studio-lab-meter p{width:100%;margin:0;color:#b2a5ae;font-size:12px}
+.studio-columns.lab .studio-sliders{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.studio-columns.lab .studio-axis:not(.discovery){display:block;padding:16px;background:#ffffff08;border:1px solid #ffffff1c;border-radius:8px;margin:0}
+.studio-columns.lab .studio-axis strong{font-size:13px}
+.studio-columns.lab .studio-axis output{color:#f3c5b6;font-size:13px}
+.studio-columns.lab .studio-axis input[type=range]{accent-color:#e6b5a5;width:100%;margin:17px 0}
+.studio-columns.lab .studio-results{border:1px solid #ffffff1d;background:#111015;border-radius:12px;padding:clamp(18px,2vw,30px)}
+.studio-columns.lab .studio-results h2{font:400 clamp(27px,3vw,41px) Georgia,serif}
+.studio-columns.lab .studio-film{background:#1d1a20;border:1px solid #ffffff26;border-radius:8px;transition:border-color .2s,transform .2s}
+.studio-columns.lab .studio-film:hover{border-color:#e8bda388;transform:translateY(-2px)}
+@media(max-width:1050px){.studio-columns.lab{grid-template-columns:1fr}.studio-lab-banner{min-height:0}.studio-columns.lab .studio-sliders{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.studio-lab-banner{padding:32px 20px}.studio-lab-steps{gap:13px}.studio-columns.lab .studio-sliders{grid-template-columns:1fr}}
