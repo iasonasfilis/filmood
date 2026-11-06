@@ -119,9 +119,11 @@ export default function Studio(){
     <p className="studio-disclaimer">We save your choices in this browser. Greece-specific catalog coverage and direct-watch links are not integrated yet; these selections do not currently filter the demo recommendations.</p>
    </section>}
   {view==="start"&&<section className="studio-hero">
-   <p className="studio-eyebrow">TWO WAYS TO FIND THE FEELING</p>
-   <h1>Your next favorite film<br/><em>starts with a feeling.</em></h1>
+   <div className="studio-cinema-backdrop" aria-hidden="true"/>
+   <p className="studio-eyebrow">FILMOOD ORIGINAL DISCOVERY EXPERIENCE</p>
+   <h1>Some feelings deserve<br/><em>another film.</em></h1>
    <p className="studio-lead">You don't need to know what to watch. Just know how you feel — or remember how another film made you feel.</p>
+   <p className="studio-feature-label">CHOOSE YOUR WAY IN <span>01 / 03</span></p>
    <div className="studio-mode-grid">
     <button className={mode==="mood"?"studio-mode selected":"studio-mode"} onClick={()=>setMode("mood")}><Heart size={26}/><strong>MOOD.</strong><span>How do you want to feel?</span></button>
     <button className={mode==="filmood"?"studio-mode selected":"studio-mode"} onClick={()=>setMode("filmood")}><Clapperboard size={26}/><strong>FILMOOD.</strong><span>Remember a film. Find the feeling.</span></button>
@@ -129,6 +131,7 @@ export default function Studio(){
    {mode==="mood"?<div className="studio-quick"><h2>Tonight, I want something that will...</h2><div className="studio-chips">{MOOD_PRESETS.map(m=><button key={m.label} className={mood===m.label?"chosen":""} onClick={()=>setMood(m.label)}>{m.label}</button>)}</div></div>
     :<div className="studio-quick"><h2>What film or series gave you that feeling?</h2><select aria-label="Reference film" value={reference} onChange={e=>changeReference(e.target.value)}>{REFERENCES.map(r=><option key={r.name}>{r.name}</option>)}</select><p>Not a genre search. We'll explore the tone, atmosphere and emotional aftertaste you remember.</p><div className="studio-chips">{["Atmosphere","Emotional feeling","Storytelling","Visuals","Characters"].map(v=><button key={v} className={keep.includes(v)?"chosen":""} onClick={()=>setKeep(a=>a.includes(v)?a.filter(x=>x!==v):[...a,v])}>{keep.includes(v)?"✓ ":""}{v}</button>)}</div></div>}
    <div className="studio-launch"><button className="studio-primary" onClick={launch}>Find my film <ArrowRight size={18}/></button><span>No account needed · Exploratory prototype</span></div>
+   <div className="studio-cinema-caption"><span>CURATED BY FEELING, NOT BY GENRE</span><span>THE CINEMA IS YOURS TO EXPLORE</span></div>
    <button className="studio-teaser" onClick={()=>enterLab()}><FlaskConical size={19}/><span><strong>Feeling cinephile today?</strong><small>Mix the DNA of your perfect film in The Film Lab.</small></span><ArrowRight size={17}/></button>
   </section>}
   {view!=="start"&&<section className="studio-workspace">
