@@ -73,7 +73,7 @@ const readable=(key:Axis,film:Film)=>AXES.find(a=>a.key===key)!.name.toLowerCase
 export default function Studio(){
  const [mode,setMode]=useState<Mode>("mood");
  const [view,setView]=useState<View>("start");
- const [mood,setMood]=useState(MOOD_PRESETS[1].label);
+ const [moods,setMoods]=useState<string[]>([MOOD_PRESETS[1].label]);
  const [chatInput,setChatInput]=useState("");
  const [chatHistory,setChatHistory]=useState<{role:"user"|"guide";text:string}[]>([]);
  const [chatTarget,setChatTarget]=useState<DNA|null>(null);
@@ -94,7 +94,7 @@ export default function Studio(){
  useEffect(()=>{try{const s=localStorage.getItem(STORAGE);if(s){const p=JSON.parse(s);if(Array.isArray(p.saved))setSaved(p.saved);if(Array.isArray(p.watched))setWatched(p.watched);if(Array.isArray(p.passed))setPassed(p.passed);if(Array.isArray(p.liked))setLiked(p.liked);if(Array.isArray(p.subscribed))setSubscribed(p.subscribed);}}catch{}setLoaded(true);},[]);
  useEffect(()=>{if(loaded){try{localStorage.setItem(STORAGE,JSON.stringify({saved,watched,passed,liked,subscribed}));}catch{}}},[saved,watched,passed,liked,subscribed,loaded]);
  const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
- const moodDNA=MOOD_PRESETS.find(m=>m.label===mood)?.target||MOOD_PRESETS[1].target;
+ const moodDNA=AXES.reduce((acc,axis)=>{const selected=MOOD_PRESETS.filter(m=>moods.includes(m.label));acc[axis.key]=Math.round(selected.reduce((sum,m)=>sum+m.target[axis.key],0)/(selected.length||1));return acc;},{} as DNA);
  const target=view==="lab"?mix:chatTarget|| (mode==="filmood"?referenceDNA:moodDNA);
  const results=useMemo(()=>FILMS.filter(f=>!passed.includes(f.id)&&!watched.includes(f.id))
   .filter(f=>mode!=="filmood"||f.title!==reference)
@@ -105,7 +105,7 @@ export default function Studio(){
   [mode,reference,region,runtime,depth,passed,watched,liked,target]);
  const launch=()=>{setMix({...target});setView("results");};
  const chooseMode=(next:Mode)=>{setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);setView("play");};
- const chooseMood=(label:string)=>{setMood(label);setChatTarget(MOOD_PRESETS.find(x=>x.label===label)?.target||null);};
+ const chooseMood=(label:string)=>{setMoods(prev=>prev.includes(label)?(prev.length>1?prev.filter(x=>x!==label):prev):[...prev,label]);setChatTarget(null);};
  const sendChat=()=>{const input=chatInput.trim();if(!input)return;const q=input.toLowerCase();const base=chatTarget|| (mode==="mood"?moodDNA:referenceDNA);const next={...base};
   if(/dark|σκοτειν|horror|τρομακ|unsettling/.test(q))next.dark=90;
   if(/funny|laugh|κωμωδ|αστει|γελα/.test(q)){next.humor=94;next.dark=25;}
@@ -152,9 +152,9 @@ export default function Studio(){
     <p className="studio-eyebrow">{mode==="mood"?"01 / MOOD.":"02 / FILMOOD."} — YOUR CINEMATIC PLAYGROUND</p>
     <h1>{mode==="mood"?"What does tonight feel like?":"A film is never just a film."}</h1>
     <p className="studio-play-intro">{mode==="mood"?"Choose a visual atmosphere or describe what you're craving. No questionnaire.":"Pick a film that stayed with you. Then tell us what you want to feel again — or just discover."}</p>
-    {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} className={"studio-visual-mood mood-"+i+(mood===m.label?" chosen":"")} onClick={()=>chooseMood(m.label)}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{mood===m.label?"SELECTED":"EXPLORE THIS FEELING"} <ArrowRight size={14}/></span></button>)}</div>
+    {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"ADD TO YOUR MIX"} <ArrowRight size={14}/></span></button>)}</div>
     :<div className="studio-film-picker"><label htmlFor="studio-reference">YOUR STARTING FILM OR SERIES</label><select id="studio-reference" value={reference} onChange={e=>{changeReference(e.target.value);setChatTarget(null);}}>{REFERENCES.map(r=><option key={r.name}>{r.name}</option>)}</select><p>From {reference}, we'll look beyond genre and plot.</p></div>}
-    <div className="studio-chat-panel"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Tell FILMOOD what you're looking for</strong><small>Optional · Prototype keyword interpretation, not connected to ChatGPT yet</small></div></div>
+    {mode==="mood"&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} {moods.length>1?"×":"✓"}</button>)}</div><small>Every selected mood contributes equally to the cinematic DNA used for recommendations.</small></div>}\n    <div className="studio-chat-panel"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Tell FILMOOD what you're looking for</strong><small>Optional · Prototype keyword interpretation, not connected to ChatGPT yet</small></div></div>
     {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
     <form onSubmit={e=>{e.preventDefault();sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Something beautiful, melancholic and a little mysterious…":"Like Arrival, but darker, stranger and more intense…"} /><button type="submit" disabled={!chatInput.trim()} aria-label="Find films from description"><ArrowRight size={20}/></button></form>
     <div className="studio-play-actions"><button className="studio-primary" onClick={launch}>Discover films <ArrowRight size={18}/></button><span>Or use the text above to shape your recommendations.</span></div></div>
