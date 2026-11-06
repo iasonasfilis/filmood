@@ -25,7 +25,7 @@ const movies: Movie[] = [
   {
     id: 2, title: "Arrival", year: 2016, runtime: "1h 56m",
     genres: ["Sci-Fi", "Drama", "Mystery"], rating: "7.9",
-    image: "https://image.tmdb.org/t/p/w500/4Iu5f2nv7huqvuYkmZvSPOtbFjs.jpg,
+    image: "https://image.tmdb.org/t/p/w500/4Iu5f2nv7huqvuYkmZvSPOtbFjs.jpg",
     backdrop: "https://image.tmdb.org/t/p/w1280/yZ5j5l7z9eZ9w0x7x6j9.jpg",
     synopsis: "A linguist is recruited by the military to communicate with mysterious spacecraft that have landed around the world.",
     match: 94, reason: "A thoughtful, quietly intense sci-fi story that rewards curiosity and leaves an emotional afterimage.", mood: "Mind-bending"
