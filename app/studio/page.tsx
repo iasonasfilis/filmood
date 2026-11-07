@@ -279,7 +279,7 @@ export default function Studio(){
       :<div className="studio-filmood-discovery studio-filmood-simple">
         <FilmSearchPicker variant="hero" label="YOUR STARTING FILM" value={filmSelected?reference:""} placeholder="Find a film…" recent={recentFilmSearches} onSelect={chooseSearchFilm} onClear={()=>{setFilmSelected(false);setChatTarget(null);}}/>
         <p className="studio-filmood-picker-help">{filmSelected?"Your film is selected. Search again to change it.":"Start typing a film title. Results appear as you type."}</p>
-       </div>
+       </div>}
       {mode==="mood"&&moods.length>0&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} ×</button>)}</div></div>}
       <aside className="studio-chat-panel studio-chat-panel-clean studio-chat-inline"><div className="studio-chat-top"><Sparkles size={19}/><div><strong>Describe your ideal film</strong><small>{mode==="filmood"&&!filmSelected?"Choose a starting film first":"Optional · Refine your recommendations with words"}</small></div></div>
        {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
