@@ -215,6 +215,7 @@ export default function Studio(){
  useEffect(()=>{if(loaded){try{localStorage.setItem(STORAGE,JSON.stringify({saved,watched,passed,liked,subscribed}));}catch{}}},[saved,watched,passed,liked,subscribed,loaded]);
  const fusionDNA=AXES.reduce((a,axis)=>{const first=FILMS.find(f=>f.title===fusionA)?.dna||FILMS[0].dna;const second=FILMS.find(f=>f.title===fusionB)?.dna||FILMS[12].dna;a[axis.key]=Math.round(first[axis.key]*fusionWeight/100+second[axis.key]*(100-fusionWeight)/100);return a;},{} as DNA);
  const fusionReady=Boolean(fusionA&&fusionB&&fusionA!==fusionB);
+ const labReady=labBase!=="Custom mix"||AXES.some(a=>mix[a.key]!==50);
  const fingerprint=useMemo(()=>{const films=FILMS.filter(f=>liked.includes(f.id)||watched.includes(f.id));if(!films.length)return null;return AXES.reduce((a,axis)=>{a[axis.key]=Math.round(films.reduce((sum,f)=>sum+f.dna[axis.key]*(liked.includes(f.id)?2:1),0)/films.reduce((sum,f)=>sum+(liked.includes(f.id)?2:1),0));return a;},{} as DNA);},[liked,watched]);
  const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
  const moodDNA=AXES.reduce((acc,axis)=>{const selected=MOOD_PRESETS.filter(m=>moods.includes(m.label));acc[axis.key]=selected.length?Math.round(selected.reduce((sum,m)=>sum+m.target[axis.key],0)/selected.length):50;return acc;},{} as DNA);
@@ -276,11 +277,9 @@ export default function Studio(){
      <div className="studio-discovery-primary">
       {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)} onKeyDown={e=>{if(e.key==="Enter"&&moods.length>0){e.preventDefault();launch();}}}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"ADD TO YOUR MIX"} <ArrowRight size={14}/></span></button>)}</div>
       :<div className="studio-filmood-discovery studio-filmood-simple">
-        <button type="button" className={"studio-filmood-picker"+(filmSelected?" has-film":"")} onClick={()=>{setFilmQuery("");setSearchCategory("films");setFilmSearchOpen(true);setFilmSearchFocus(true);}}>
-         {filmSelected?<><span className="studio-filmood-picker-poster">{FILMS.find(f=>f.title===reference)?.poster?<img src={"https://image.tmdb.org/t/p/w185/"+FILMS.find(f=>f.title===reference)?.poster} alt=""/>:<Clapperboard size={30}/>}</span><span className="studio-filmood-picker-copy"><small>YOUR STARTING FILM</small><strong>{reference}</strong><span>{FILMS.find(f=>f.title===reference)?.year} · Select to change film</span></span><Search size={22}/></>:<><span className="studio-filmood-picker-symbol"><Search size={32}/></span><span className="studio-filmood-picker-copy"><small>YOUR STARTING FILM</small><strong>Find a film</strong><span>Search by title to choose your starting point</span></span><ArrowRight size={23}/></>}
-        </button>
-        <p className="studio-filmood-picker-help">{filmSelected?"Ready to discover? You can still change your film above.":"No film is preselected. Your choice shapes the recommendations."}</p>
-       </div>}
+        <FilmSearchPicker variant="hero" label="YOUR STARTING FILM" value={filmSelected?reference:""} placeholder="Find a film…" recent={recentFilmSearches} onSelect={chooseSearchFilm} onClear={()=>{setFilmSelected(false);setChatTarget(null);}}/>
+        <p className="studio-filmood-picker-help">{filmSelected?"Your film is selected. Search again to change it.":"Start typing a film title. Results appear as you type."}</p>
+       </div>
       {mode==="mood"&&moods.length>0&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} ×</button>)}</div></div>}
       <aside className="studio-chat-panel studio-chat-panel-clean studio-chat-inline"><div className="studio-chat-top"><Sparkles size={19}/><div><strong>Describe your ideal film</strong><small>{mode==="filmood"&&!filmSelected?"Choose a starting film first":"Optional · Refine your recommendations with words"}</small></div></div>
        {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
@@ -289,12 +288,9 @@ export default function Studio(){
       </aside>
      </div>
      <aside className="studio-discover-panel">
-      <div className="studio-discover-panel-head"><span className="studio-eyebrow">YOUR NEXT WATCH</span><Sparkles size={22}/></div>
-      <h2>{mode==="mood"?"Turn a feeling into a film.":"Follow the feeling."}</h2>
-      <p>{mode==="mood"?"Your selected moods become six film recommendations.":"We'll find six films inspired by the one you choose."}</p>
-      <div className="studio-discover-panel-bottom">
-       <button type="button" className="studio-primary studio-discover-cta" disabled={mode==="mood"?moods.length===0&&!chatTarget:!filmSelected} onClick={launch}>Discover films <ArrowRight size={23}/></button>
-       <small><kbd>Enter ↵</kbd> to discover {mode==="mood"&&moods.length===0&&!chatTarget?"· Choose a mood first":mode==="filmood"&&!filmSelected?"· Choose a film first":""}</small>
+      <button type="button" className="studio-primary studio-discover-cta" disabled={mode==="mood"?moods.length===0&&!chatTarget:!filmSelected} onClick={launch}><span>Discover films</span><ArrowRight size={32}/></button>
+      <div className="studio-discover-meta">
+       <p>{mode==="mood"?"Your mood mix becomes six film recommendations.":"Six recommendations inspired by your starting film."}</p>
        <button type="button" className="studio-optional-toggle" aria-expanded={showFilmPreferences} onClick={()=>setShowFilmPreferences(v=>!v)}>{showFilmPreferences?"− Hide viewing occasion":"+ Viewing occasion (optional)"}</button>
        {showFilmPreferences&&<label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>}
       </div>
@@ -309,9 +305,9 @@ export default function Studio(){
       <span className="studio-eyebrow">01 / CHOOSE TWO FILMS</span>
       <h2>Create your fusion.</h2>
       <div className="studio-fusion-controls">
-       <label>FIRST FILM<select aria-label="First film" value={fusionA} onChange={e=>setFusionA(e.target.value)}><option value="">Choose a film…</option>{FILMS.map(f=><option key={f.id} value={f.title}>{f.title}</option>)}</select></label>
+       <FilmSearchPicker label="FIRST FILM" placeholder="Search first film…" value={fusionA} recent={recentFilmSearches} onSelect={f=>{setFusionA(f.title);setFusionShowResults(false);}} onClear={()=>{setFusionA("");setFusionShowResults(false);}}/>
        <span className="studio-fusion-plus">+</span>
-       <label>SECOND FILM<select aria-label="Second film" value={fusionB} onChange={e=>setFusionB(e.target.value)}><option value="">Choose a film…</option>{FILMS.map(f=><option key={f.id} value={f.title}>{f.title}</option>)}</select></label>
+       <FilmSearchPicker label="SECOND FILM" placeholder="Search second film…" value={fusionB} recent={recentFilmSearches} onSelect={f=>{setFusionB(f.title);setFusionShowResults(false);}} onClear={()=>{setFusionB("");setFusionShowResults(false);}}/>
       </div>
       <div className="studio-fusion-ratio-head"><span className="studio-eyebrow">02 / FIND THE BALANCE</span><strong>{fusionWeight}% <span>/</span> {100-fusionWeight}%</strong></div>
       <div className="studio-fusion-balance"><span>{fusionA||"First film"}</span><span>{fusionB||"Second film"}</span></div>
@@ -338,7 +334,7 @@ export default function Studio(){
     <section className="studio-controls">
      {view==="lab"?<>
        <p className="studio-eyebrow">YOUR MIXING DESK</p><h1>Make it yours.</h1><p className="studio-muted">Move the sliders. Your film matches update instantly.</p>
-       <div className="studio-base"><label htmlFor="base-film">YOUR STARTING RECIPE</label><select id="base-film" value={labBase} onChange={e=>{const value=e.target.value;setLabBase(value);setMix({...(value==="Custom mix"?neutralDNA:REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||neutralDNA)});}}><option value="Custom mix">Custom recipe · Start from scratch</option>{[...REFERENCES.map(r=>r.name),...FILMS.map(f=>f.title).filter(name=>!REFERENCES.some(r=>r.name===name))].map(name=><option key={name}>{name}</option>)}</select><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
+       <div className="studio-base studio-lab-base-search"><FilmSearchPicker label="CHOOSE BASE FILM" placeholder="Search for a base film…" value={labBase==="Custom mix"?"":labBase} recent={recentFilmSearches} onSelect={f=>{setLabBase(f.title);setReference(f.title);setMix({...f.dna});}} onClear={()=>{setLabBase("Custom mix");setMix({...neutralDNA});}} onCustom={()=>{setLabBase("Custom mix");setMix({...neutralDNA});}}/><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
        <p className="studio-lab-slider-heading">EIGHT CINEMATIC INGREDIENTS</p><div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
      </>:<>
        <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."}</p><h1>We found your kind of films.</h1><p className="studio-muted">{mode==="mood"?"A few picks for the feeling you're after.":"Inspired by "+reference+" and its emotional signature."}</p>
@@ -352,7 +348,7 @@ export default function Studio(){
       <label className="studio-axis discovery"><span><strong>Familiar ↔ Hidden gems</strong><output>{depth<34?"Familiar":depth>67?"Deep cuts":"Balanced"}</output></span><input type="range" min="0" max="100" value={depth} onChange={e=>setDepth(Number(e.target.value))}/></label>
      </div></details>
     </section>
-    <section className="studio-results">
+    {view==="lab"&&!labReady?<section className="studio-results studio-lab-awaiting"><div className="studio-lab-awaiting-content"><Search size={37}/><span className="studio-eyebrow">THE DIRECTOR’S CUT</span><h2>Choose your base film.</h2><p>Search for a film to unlock its cinematic DNA and live recommendations, or adjust a slider to build your own recipe.</p></div></section>:<section className="studio-results">
 <div className="studio-row"><div><p className="studio-eyebrow">LIVE RESULTS</p><h2>{view==="lab"?"The director’s cut":"Your films for tonight"}</h2></div><span className="studio-live"><i/>LIVE</span></div>
      <p className="studio-muted small">Match percentages are illustrative similarities calculated from eight manually estimated cinematic DNA attributes — not AI confidence, ratings or verified streaming listings.</p>
      {results.length===0?<div className="studio-empty">No matches with these constraints. Try changing the region or runtime, or reset a pass.</div>:results.map((f,i)=><article key={f.id} className="studio-film">
