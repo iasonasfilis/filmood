@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import NativeBridge from "./native-bridge";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,10 +11,17 @@ export const metadata: Metadata = {
   icons: { icon: "/icon.svg" }
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#100e14",
+};
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={process.env.FILMOOD_NATIVE === "1" ? "filmood-native" : undefined}>
+      <body>{process.env.FILMOOD_NATIVE === "1" && <NativeBridge />}{children}</body>
     </html>
   );
 }
