@@ -164,13 +164,17 @@ export default function Studio(){
    <p className="studio-eyebrow">FILMOOD ORIGINAL DISCOVERY EXPERIENCE</p>
    <h1>Some feelings deserve<br/><em>another film.</em></h1>
    <p className="studio-lead">A cinematic experience built around what moves you. Pick a direction. The discovery begins on the next screen.</p>
-   <p className="studio-feature-label">CHOOSE YOUR WAY IN <span>01 / 03</span></p>
+   <p className="studio-feature-label">CHOOSE YOUR WAY IN <span>01 / 06</span></p>
    <div className="studio-mode-grid">
     <button className="studio-mode" onClick={()=>chooseMode("mood")}><Heart size={27}/><strong>MOOD.</strong><span>Start with a feeling. Discover where it takes you.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
     <button className="studio-mode" onClick={()=>chooseMode("filmood")}><Clapperboard size={27}/><strong>FILMOOD.</strong><span>Start with a film. Follow its emotional aftertaste.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
    </div>
-   <div className="studio-new-features"><button onClick={()=>setView("fusion")}>DNA Fusion · Blend two films <ArrowRight size={16}/></button><button onClick={()=>setView("fingerprint")}>Your cinematic fingerprint <ArrowRight size={16}/></button><button onClick={selectSurprise}>Blind date with a film <ArrowRight size={16}/></button></div>
-   <button className="studio-teaser" onClick={()=>enterLab()}><FlaskConical size={20}/><span><strong>The Film Lab.</strong><small>Mix your cinematic DNA. Make something unexpected.</small></span><ArrowRight size={18}/></button>
+   <div className="studio-secondary-grid">
+    <button className="studio-secondary-card" onClick={()=>enterLab()}><span className="studio-secondary-icon"><FlaskConical size={24}/></span><span className="studio-secondary-index">03 / EXPERIMENT</span><strong>The Film Lab.</strong><small>Shape your cinematic DNA. Eight ingredients, your own recipe.</small><ArrowRight className="studio-secondary-arrow" size={19}/></button>
+    <button className="studio-secondary-card" onClick={()=>setView("fusion")}><span className="studio-secondary-icon"><Clapperboard size={24}/></span><span className="studio-secondary-index">04 / EXPERIMENT</span><strong>DNA Fusion.</strong><small>Two films. One new feeling. Blend their cinematic signatures.</small><ArrowRight className="studio-secondary-arrow" size={19}/></button>
+    <button className="studio-secondary-card" onClick={()=>setView("fingerprint")}><span className="studio-secondary-icon"><Heart size={24}/></span><span className="studio-secondary-index">05 / YOUR PROFILE</span><strong>Your Fingerprint.</strong><small>Discover the cinematic identity behind your favourite films.</small><ArrowRight className="studio-secondary-arrow" size={19}/></button>
+    <button className="studio-secondary-card" onClick={selectSurprise}><span className="studio-secondary-icon"><Sparkles size={24}/></span><span className="studio-secondary-index">06 / SURPRISE</span><strong>Blind Date.</strong><small>No poster. No expectations. Just a film waiting to find you.</small><ArrowRight className="studio-secondary-arrow" size={19}/></button>
+   </div>
   </section>}
   {view==="play"&&<section className="studio-play">
     <button className="studio-back-link" onClick={()=>setView("start")}><ArrowLeft size={16}/> Choose another experience</button>
