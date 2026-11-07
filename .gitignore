@@ -4,3 +4,16 @@ out
 .env
 .env.local
 .DS_Store
+# Native projects are source code; keep android/ and ios/ once generated.
+# Only ignore local SDK configuration, dependencies and build outputs.
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+*.xcuserstate

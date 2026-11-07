@@ -12,6 +12,10 @@ A polished, responsive Next.js frontend prototype for the FILMOOD movie discover
 - Guest taste profile
 - Responsive desktop and mobile layouts
 
+## Android & iPhone app
+
+This repository also includes a Capacitor-based native mobile foundation with its own mobile interface. The desktop website remains a separate Next.js build. See [MOBILE.md](MOBILE.md) for Android Studio, Xcode, static export, GitHub Actions builds and publishing requirements.
+
 ## Requirements
 - Node.js 18.17+ (Node 20 LTS recommended)
 - npm

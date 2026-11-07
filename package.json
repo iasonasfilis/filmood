@@ -6,13 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "mobile:build": "node scripts/build-mobile.mjs",
+    "mobile:android": "node scripts/prepare-mobile.mjs android",
+    "mobile:ios": "node scripts/prepare-mobile.mjs ios",
+    "mobile:sync": "node scripts/prepare-mobile.mjs sync",
+    "mobile:open:android": "npx cap open android",
+    "mobile:open:ios": "npx cap open ios"
   },
   "dependencies": {
     "next": "^15.5.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "lucide-react": "^0.468.0"
+    "lucide-react": "^0.468.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/browser": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.17.10",
@@ -21,6 +30,9 @@
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
   }
 }

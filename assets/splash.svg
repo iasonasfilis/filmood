@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1170 2532">
+<rect width="1170" height="2532" fill="#100e14"/>
+<defs><radialGradient id="glow"><stop stop-color="#704778" stop-opacity=".6"/><stop offset="1" stop-color="#100e14" stop-opacity="0"/></radialGradient></defs>
+<ellipse cx="585" cy="1266" rx="570" ry="630" fill="url(#glow)"/>
+<g transform="translate(329 900) scale(1)">
+<rect width="512" height="512" rx="110" fill="#211829"/>
+<circle cx="256" cy="256" r="190" fill="none" stroke="#c8a0c3" stroke-width="14" opacity=".6"/>
+<path d="M120 325V187h58l78 99 78-99h58v138h-52v-77l-84 100-84-100v77z" fill="#f4eaf3"/>
+<circle cx="390" cy="367" r="21" fill="#d5a5ce"/>
+</g>
+<text x="585" y="1560" fill="#f5eaf3" font-family="Arial, sans-serif" font-weight="700" font-size="94" letter-spacing="14" text-anchor="middle">FILMOOD<tspan fill="#d5a5ce">.</tspan></text>
+<text x="585" y="1640" fill="#d3bed4" font-family="Arial, sans-serif" font-size="26" letter-spacing="4" text-anchor="middle">SOME FEELINGS DESERVE ANOTHER FILM</text>
+</svg>
