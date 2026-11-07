@@ -6,6 +6,7 @@ import { interpretFilmate } from "./filmate-lite";
 import "./filmood-discovery.css";
 import "./discovery-layout.css";
 import "./extra-features.css";
+import "./compact-experiences.css";
 import { FILMS, type Film } from "./film-data";
 
 type Axis = "dark" | "pace" | "emotion" | "mind" | "visual" | "indie" | "humor" | "action";
@@ -251,13 +252,15 @@ export default function Studio(){
     <button className="studio-experiment-card studio-experiment-blend" onClick={()=>navigate("fusion")}><span className="studio-experiment-icon"><FusionDnaIcon/></span><strong>Film DNA Fusion.</strong><small>Two films. One DNA. Discover what happens when their cinematic worlds meet.</small><span className="studio-experiment-action">START FUSING <ArrowRight size={17}/></span></button>
    </div>
   </section>}
-  {view==="play"&&<section className="studio-play studio-play-refined">
-    <button className="studio-back-link" onClick={()=>navigate("start")}><ArrowLeft size={16}/> Back to home</button>
-    <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."} / FIND YOUR NEXT FILM</p>
-    <h1>{mode==="mood"?"What does tonight feel like?":"Start with a film you love."}</h1>
-    <p className="studio-play-intro">{mode==="mood"?"Choose one or more moods, or describe the feeling you want.":"Choose your starting film. We'll find its cinematic relatives."}</p>
+  {view==="play"&&<section className={"studio-play studio-play-refined studio-experiment studio-discovery-screen studio-discovery-"+mode}>
+    <button className="studio-back-link studio-feature-back" onClick={()=>navigate("start")}><ArrowLeft size={16}/> Back to home</button>
+    <div className="studio-feature-banner studio-discovery-banner">
+     <span>{mode==="mood"?"MOOD.":"FILMOOD."} / FIND YOUR NEXT FILM</span>
+     <h1>{mode==="mood"?"What does tonight feel like?":"Start with a film you love."}</h1>
+     <p className="studio-play-intro">{mode==="mood"?"Choose one or more moods, or describe the feeling you want.":"Choose your starting film. We'll find its cinematic relatives."}</p>
+    </div>
     <div className="studio-discovery-columns">
-     <div className="studio-discovery-primary">
+     <div className="studio-discovery-primary studio-discovery-console">
       {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)} onKeyDown={e=>{if(e.key==="Enter"&&moods.length>0){e.preventDefault();launch();}}}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"ADD TO YOUR MIX"} <ArrowRight size={14}/></span></button>)}</div>
       :<div className="studio-filmood-discovery studio-filmood-simple">
         <FilmSearchPicker variant="hero" label="YOUR STARTING FILM" value={filmSelected?reference:""} placeholder="Find a film…" recent={recentFilmSearches} onSelect={chooseSearchFilm} onClear={()=>{setFilmSelected(false);setChatTarget(null);}}/>
@@ -270,7 +273,7 @@ export default function Studio(){
        <form onSubmit={e=>{e.preventDefault();sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} disabled={mode==="filmood"&&!filmSelected} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Beautiful, melancholic, a little mysterious…":filmSelected?"Like this film, but darker and stranger…":"Select a film to unlock refinement"} /><button type="submit" disabled={!chatInput.trim()||(mode==="filmood"&&!filmSelected)} aria-label="Refine recommendations"><ArrowRight size={20}/></button></form>
       </aside>
      </div>
-     <aside className="studio-discover-panel">
+     <aside className="studio-discover-panel studio-discovery-output">
       <button type="button" className="studio-primary studio-discover-cta" disabled={mode==="mood"?moods.length===0&&!chatTarget:!filmSelected} onClick={launch}><span>Discover films</span><ArrowRight size={32}/></button>
       <div className="studio-discover-meta">
        <p>{mode==="mood"?"Your mood mix becomes six film recommendations.":"Six recommendations inspired by your starting film."}</p>
@@ -338,7 +341,7 @@ export default function Studio(){
        <button className="studio-poster" onClick={()=>openDetails(f)} aria-label={"Details for "+f.title}><span>{f.title.slice(0,1)}</span>{f.poster&&<img src={"https://image.tmdb.org/t/p/w342/"+f.poster} alt="" loading="lazy" onError={e=>{e.currentTarget.style.display="none";}}/>}</button>
        <div className="studio-film-body"><div className="studio-match-heading"><span className="studio-rank">{String(i+1).padStart(2,"0")} / CURATED PICK</span><span className="studio-match-score" title="Illustrative similarity based on the eight cinematic DNA attributes"><strong>{matchPercentage(f,target)}%</strong><small>DNA MATCH</small></span></div><h3>{f.title}</h3><p>{f.year} · {f.length} min · {f.region}</p><p className="studio-reason">{sharedReason(f)}</p><div className="studio-film-actions"><button onClick={()=>toggle(saved,setSaved,f.id)} title="Watchlist"><Bookmark size={15} fill={saved.includes(f.id)?"currentColor":"none"}/>{saved.includes(f.id)?"Saved":"Save"}</button><button onClick={()=>toggle(watched,setWatched,f.id)} title="Mark watched"><Check size={15}/>{watched.includes(f.id)?"Watched":"Watched?"}</button><button onClick={()=>toggle(liked,setLiked,f.id)} title="More like this"><Heart size={15} fill={liked.includes(f.id)?"currentColor":"none"}/>{liked.includes(f.id)?"Liked":"More like this"}</button><button onClick={()=>setPassed(a=>a.includes(f.id)?a:[...a,f.id])} title="Not for me"><X size={15}/>Pass</button><button onClick={()=>openDetails(f)} title={"Cast and crew for "+f.title}><Clapperboard size={15}/>Cast &amp; crew</button><button onClick={()=>enterLab(f)} title="Remix this film"><FlaskConical size={15}/>Remix</button></div></div>
       </article>)}
-     <div className="studio-verification"><strong>Where to watch in Greece</strong><p>Provider availability is not verified in this prototype. We won't invent Netflix, Cinobo, ERTFLIX or other watch links.</p><button onClick={()=>setProviderOpen(true)}>Manage my streaming services <ArrowRight size={15}/></button></div>
+     {view==="lab"?<details className="studio-verification studio-lab-availability"><summary>Where to watch · Availability not verified</summary><p>Streaming listings in Greece are not connected yet.</p><button onClick={()=>setProviderOpen(true)}>Manage streaming services <ArrowRight size={15}/></button></details>:<div className="studio-verification"><strong>Where to watch in Greece</strong><p>Provider availability is not verified in this prototype. We won't invent Netflix, Cinobo, ERTFLIX or other watch links.</p><button onClick={()=>setProviderOpen(true)}>Manage my streaming services <ArrowRight size={15}/></button></div>}
      {passed.length>0&&<button className="studio-undo" onClick={()=>setPassed([])}>Restore passed films ({passed.length})</button>}
     </section>}
    </div>
