@@ -1,0 +1,820 @@
+/*
+ * FILMOOD native shell — applied ONLY to builds whose <html> has .filmood-native.
+ * The desktop Next.js website is intentionally unaffected.
+ * Phone-first layouts are designed for touch, safe areas, and bottom navigation.
+ */
+
+html.filmood-native {
+  color-scheme: dark;
+  scroll-padding-top: calc(64px + env(safe-area-inset-top));
+}
+html.filmood-native,
+html.filmood-native body {
+  max-width: 100%;
+  overflow-x: clip;
+  background: #0c0a10;
+}
+.filmood-native .studio {
+  width: 100%;
+  min-height: 100dvh;
+  padding-bottom: calc(78px + env(safe-area-inset-bottom));
+  background: #0c0a10;
+  overflow-x: clip;
+}
+.filmood-native .studio * {
+  -webkit-tap-highlight-color: transparent;
+}
+.filmood-native .studio button,
+.filmood-native .studio a,
+.filmood-native .studio summary {
+  touch-action: manipulation;
+}
+.filmood-native .studio input,
+.filmood-native .studio select,
+.filmood-native .studio textarea {
+  font-size: 16px;
+}
+.filmood-native .studio .studio-footer {
+  display: none !important;
+}
+
+/* App chrome: one compact header + persistent five-tab navigation. */
+.filmood-native .studio .studio-nav {
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  width: 100%;
+  min-height: calc(58px + env(safe-area-inset-top));
+  padding: env(safe-area-inset-top) 14px 0;
+  gap: 0;
+  border-bottom: 1px solid #ddbae225;
+  background: #0c0a10f2;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+.filmood-native .studio .studio-menu-toggle {
+  grid-column: 1;
+  justify-self: start;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+}
+.filmood-native .studio .studio-word {
+  grid-column: 2;
+  justify-self: center;
+  font-size: 23px;
+  letter-spacing: .18em;
+  white-space: nowrap;
+}
+.filmood-native .studio .studio-nav nav {
+  grid-column: 3;
+  justify-self: end;
+  display: block;
+}
+.filmood-native .studio .studio-account-nav {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  font-size: 0 !important;
+  border-radius: 13px;
+}
+.filmood-native .studio .studio-account-nav svg {
+  width: 22px;
+  height: 22px;
+}
+.filmood-native .studio-native-tabs {
+  position: fixed;
+  z-index: 85;
+  inset: auto 0 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+  min-height: calc(67px + env(safe-area-inset-bottom));
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+  border-top: 1px solid #d4a9d143;
+  background: #15101cf7;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 -12px 36px #0008;
+}
+.filmood-native .studio-native-tabs button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  min-height: 51px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #a99aaf;
+  font: 500 10px/1.1 Arial, sans-serif;
+  letter-spacing: .01em;
+}
+.filmood-native .studio-native-tabs button[aria-current="page"] {
+  color: #eac9fb;
+  background: #a776c02a;
+}
+.filmood-native .studio-native-tabs button[aria-current="page"] svg {
+  filter: drop-shadow(0 0 9px #b58bd870);
+}
+.filmood-native .studio-native-tabs button:focus-visible {
+  outline: 2px solid #d7aaf1;
+  outline-offset: -2px;
+}
+.filmood-native .studio .studio-site-drawer {
+  width: min(86vw, 340px);
+  max-width: 340px;
+  padding-top: calc(16px + env(safe-area-inset-top));
+  padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+/* Home: editorial hero, two big discovery choices, two slim experiments. */
+.filmood-native .studio-home .studio-hero {
+  display: block;
+  min-height: 0 !important;
+  height: auto !important;
+  max-width: 100%;
+  margin: 0;
+  padding: 29px 16px 34px !important;
+  overflow: hidden;
+}
+.filmood-native .studio-home .studio-cinema-carousel {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  opacity: .76;
+}
+.filmood-native .studio-home .studio-cinema-carousel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #0c0a10a6 0%, #0c0a10aa 44%, #0c0a10f2 100%);
+}
+.filmood-native .studio-home .studio-hero > :not(.studio-cinema-carousel) {
+  position: relative;
+  z-index: 1;
+}
+.filmood-native .studio-home .studio-hero > .studio-eyebrow {
+  margin: 0 0 11px;
+  font-size: 9px;
+  letter-spacing: .18em;
+}
+.filmood-native .studio-home .studio-hero > h1 {
+  max-width: 450px;
+  margin: 0 0 11px;
+  font: 400 clamp(35px, 9.6vw, 52px)/1.04 Georgia, serif;
+  letter-spacing: -.045em;
+}
+.filmood-native .studio-home .studio-lead {
+  max-width: 420px;
+  margin: 0 0 22px;
+  font-size: 12px;
+  line-height: 1.55;
+  color: #e2d1df;
+}
+.filmood-native .studio-home .studio-feature-label,
+.filmood-native .studio-home .studio-experiments-heading {
+  margin: 0 0 9px;
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+.filmood-native .studio-home .studio-mode-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+.filmood-native .studio-home .studio-mode {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto auto;
+  align-content: center;
+  gap: 4px 10px;
+  width: 100%;
+  min-height: 132px !important;
+  padding: 16px 18px !important;
+  border-radius: 15px;
+  box-shadow: 0 12px 30px #0006;
+}
+.filmood-native .studio-home .studio-mode > svg:first-child {
+  grid-column: 1;
+  width: 23px;
+  height: 23px;
+}
+.filmood-native .studio-home .studio-mode strong {
+  grid-column: 1;
+  font: 400 clamp(28px, 8vw, 37px)/1.05 Georgia, serif;
+}
+.filmood-native .studio-home .studio-mode > span {
+  grid-column: 1;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.filmood-native .studio-home .studio-mode-arrow {
+  right: 18px;
+  bottom: 21px;
+}
+.filmood-native .studio-home .studio-experiments-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.filmood-native .studio-home .studio-experiment-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+  min-height: 155px !important;
+  padding: 14px !important;
+  border-radius: 14px;
+}
+.filmood-native .studio-home .studio-experiment-icon {
+  width: 34px;
+  height: 34px;
+  margin: 0;
+}
+.filmood-native .studio-home .studio-experiment-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.filmood-native .studio-home .studio-experiment-card strong {
+  font: 400 19px/1.12 Georgia, serif;
+  letter-spacing: -.02em;
+}
+.filmood-native .studio-home .studio-experiment-card small {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.35;
+}
+.filmood-native .studio-home .studio-experiment-action {
+  display: none;
+}
+
+/* Reusable compact page banners and touch-friendly controls. */
+.filmood-native .studio .studio-feature-back,
+.filmood-native .studio .studio-back-link,
+.filmood-native .studio .studio-workspace-head {
+  margin: 0 0 10px;
+}
+.filmood-native .studio .studio-feature-back,
+.filmood-native .studio .studio-back-link {
+  min-height: 35px;
+  font-size: 12px;
+}
+.filmood-native .studio .studio-discovery-screen,
+.filmood-native .studio .studio-fusion-screen,
+.filmood-native .studio .studio-feature-screen,
+.filmood-native .studio .studio-workspace {
+  width: 100%;
+  max-width: none;
+  min-height: 0;
+  padding: 14px 14px 22px !important;
+}
+.filmood-native .studio .studio-feature-banner,
+.filmood-native .studio .studio-lab-banner-compact {
+  min-height: 0;
+  margin: 0 0 13px;
+  padding: 16px 17px;
+  border-radius: 14px;
+}
+.filmood-native .studio .studio-feature-banner h1,
+.filmood-native .studio .studio-lab-banner-compact h2 {
+  margin: 5px 0 7px;
+  font: 400 clamp(27px, 7.6vw, 37px)/1.08 Georgia, serif;
+  letter-spacing: -.03em;
+}
+.filmood-native .studio .studio-feature-banner p,
+.filmood-native .studio .studio-lab-banner-compact p {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.filmood-native .studio .studio-feature-banner > span {
+  font-size: 9px;
+  letter-spacing: .16em;
+}
+
+/* MOOD and FILMOOD are native discovery screens, not desktop columns. */
+.filmood-native .studio .studio-discovery-screen .studio-discovery-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: stretch;
+}
+.filmood-native .studio .studio-discovery-screen .studio-discovery-console {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.filmood-native .studio .studio-discovery-screen .studio-discovery-output {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.filmood-native .studio .studio-discovery-screen .studio-visual-moods {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 112px;
+  gap: 9px;
+}
+.filmood-native .studio .studio-discovery-screen .studio-visual-mood {
+  min-height: 112px;
+  height: 112px;
+  padding: 12px;
+  border-radius: 13px;
+}
+.filmood-native .studio .studio-discovery-screen .studio-visual-mood strong {
+  font: 400 clamp(19px, 5.5vw, 25px)/1.05 Georgia, serif;
+}
+.filmood-native .studio .studio-discovery-screen .studio-visual-mood-number,
+.filmood-native .studio .studio-discovery-screen .studio-mood-check {
+  font-size: 9px;
+}
+.filmood-native .studio .studio-discovery-screen .studio-mood-mix {
+  padding: 9px 11px;
+  border-radius: 11px;
+}
+.filmood-native .studio .studio-discovery-screen .studio-chat-inline {
+  width: 100%;
+  min-height: 0 !important;
+  padding: 13px !important;
+  border-radius: 13px;
+}
+.filmood-native .studio .studio-chat-inline .studio-chat-top strong {
+  font-size: 14px;
+}
+.filmood-native .studio .studio-chat-inline .studio-chat-compose {
+  margin-top: 10px;
+}
+.filmood-native .studio .studio-chat-inline .studio-chat-compose input {
+  height: 45px;
+  font-size: 16px;
+}
+.filmood-native .studio .studio-chat-inline .studio-chat-compose button {
+  min-width: 45px;
+  min-height: 45px;
+}
+.filmood-native .studio .studio-discovery-screen .studio-discover-cta {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: none;
+  height: 60px;
+  min-height: 60px;
+  padding: 0 20px;
+  border-radius: 13px;
+  font: 600 19px/1.2 Arial, sans-serif;
+}
+.filmood-native .studio .studio-discovery-screen .studio-discover-cta svg {
+  align-self: center;
+}
+.filmood-native .studio .studio-discovery-screen .studio-discover-meta {
+  padding: 0 3px;
+}
+.filmood-native .studio .studio-discovery-screen .studio-discover-meta p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.45;
+}
+.filmood-native .studio .studio-discovery-screen .studio-optional-toggle {
+  min-height: 40px;
+  font-size: 11px;
+}
+.filmood-native .studio .studio-discovery-filmood .studio-film-picker-hero,
+.filmood-native .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-input-wrap {
+  min-height: 145px;
+}
+.filmood-native .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-input-wrap {
+  padding: 36px 12px 12px;
+  gap: 12px;
+  border-radius: 14px;
+}
+.filmood-native .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-label {
+  top: 17px;
+  left: 88px;
+  font-size: 10px;
+}
+.filmood-native .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-art {
+  width: 65px;
+  height: 88px;
+}
+.filmood-native .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-input-wrap input {
+  min-width: 0;
+  height: 48px;
+  font-size: clamp(22px, 6vw, 31px);
+}
+.filmood-native .studio .studio-film-picker-results {
+  max-height: min(52dvh, 390px);
+  overscroll-behavior: contain;
+}
+.filmood-native .studio .studio-film-picker-result {
+  min-height: 60px;
+}
+.filmood-native .studio .studio-film-picker-input-wrap {
+  min-height: 48px;
+}
+.filmood-native .studio .studio-film-picker-input-wrap input {
+  height: 46px;
+  font-size: 16px;
+}
+
+/* Native Lab/Fusion: a segmented view prevents a 2-column desktop layout
+   becoming an enormous vertical page. User can switch Recipe <-> Matches. */
+.filmood-native .studio .studio-native-segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 0 13px;
+  padding: 4px;
+  border: 1px solid #c5a2d14a;
+  border-radius: 13px;
+  background: #211927;
+}
+.filmood-native .studio .studio-native-segmented button {
+  min-height: 43px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #bca9c3;
+  font-size: 13px;
+  font-weight: 600;
+}
+.filmood-native .studio .studio-native-segmented button[aria-selected="true"] {
+  background: #aa82cb;
+  color: #150f1c;
+  box-shadow: 0 3px 12px #0004;
+}
+.filmood-native .studio .studio-columns.lab,
+.filmood-native .studio .studio-fusion-screen .studio-feature-layout {
+  display: block;
+  width: 100%;
+  padding: 0;
+}
+.filmood-native .studio .studio-columns.lab.native-panel-mix > .studio-results,
+.filmood-native .studio .studio-fusion-screen .native-panel-mix > .studio-fusion-output {
+  display: none !important;
+}
+.filmood-native .studio .studio-columns.lab.native-panel-matches > .studio-controls,
+.filmood-native .studio .studio-fusion-screen .native-panel-matches > .studio-fusion-console {
+  display: none !important;
+}
+.filmood-native .studio .studio-columns.lab > .studio-controls,
+.filmood-native .studio .studio-columns.lab > .studio-results,
+.filmood-native .studio .studio-fusion-screen .studio-fusion-console,
+.filmood-native .studio .studio-fusion-screen .studio-fusion-output {
+  width: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 16px 14px;
+  border-radius: 14px;
+}
+.filmood-native .studio .studio-columns.lab .studio-controls h1,
+.filmood-native .studio .studio-fusion-console h2,
+.filmood-native .studio .studio-fusion-output h2 {
+  font-size: clamp(26px, 7vw, 34px);
+  margin: 4px 0 8px;
+}
+.filmood-native .studio .studio-lab-base-search {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  margin: 12px 0 9px;
+  padding: 9px;
+}
+.filmood-native .studio .studio-lab-base-search .studio-film-picker {
+  flex: 1;
+  min-width: 0;
+}
+.filmood-native .studio .studio-lab-base-search > button {
+  min-width: 60px;
+  min-height: 48px;
+  padding: 7px;
+  font-size: 11px;
+}
+.filmood-native .studio .studio-columns.lab .studio-sliders {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.filmood-native .studio .studio-columns.lab .studio-axis:not(.discovery) {
+  min-width: 0;
+  padding: 11px 9px;
+  border-radius: 11px;
+}
+.filmood-native .studio .studio-columns.lab .studio-axis > span:first-child {
+  align-items: flex-start;
+  gap: 4px;
+}
+.filmood-native .studio .studio-columns.lab .studio-axis strong {
+  font-size: 11px;
+}
+.filmood-native .studio .studio-columns.lab .studio-axis output {
+  font-size: 10px;
+  white-space: nowrap;
+}
+.filmood-native .studio .studio-columns.lab .studio-axis input[type="range"] {
+  width: 100%;
+  min-height: 28px;
+  margin: 8px 0 3px;
+}
+.filmood-native .studio .studio-columns.lab .studio-limits {
+  display: none;
+}
+.filmood-native .studio .studio-columns.lab .studio-results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+.filmood-native .studio .studio-columns.lab .studio-results > .studio-row,
+.filmood-native .studio .studio-columns.lab .studio-results > .studio-muted.small,
+.filmood-native .studio .studio-columns.lab .studio-results > .studio-verification,
+.filmood-native .studio .studio-columns.lab .studio-results > .studio-undo {
+  grid-column: 1 / -1;
+}
+.filmood-native .studio .studio-columns.lab .studio-film {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 128px;
+  padding: 10px;
+  margin: 0;
+  border-radius: 11px;
+}
+.filmood-native .studio .studio-columns.lab .studio-poster {
+  width: 76px;
+  height: 114px;
+  min-width: 76px;
+}
+.filmood-native .studio .studio-columns.lab .studio-film h3 {
+  font-size: 17px;
+  line-height: 1.2;
+}
+.filmood-native .studio .studio-columns.lab .studio-film-body {
+  min-width: 0;
+}
+.filmood-native .studio .studio-columns.lab .studio-film-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.filmood-native .studio .studio-columns.lab .studio-film-actions button {
+  min-height: 32px;
+  font-size: 10px;
+}
+.filmood-native .studio .studio-columns.lab .studio-match-score {
+  padding: 4px 7px;
+}
+.filmood-native .studio .studio-columns.lab .studio-match-score strong {
+  font-size: 17px;
+}
+
+/* Fusion input and two-column results designed for one-hand navigation. */
+.filmood-native .studio .studio-fusion-console .studio-fusion-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin: 12px 0 15px;
+}
+.filmood-native .studio .studio-fusion-console .studio-fusion-plus {
+  display: none;
+}
+.filmood-native .studio .studio-fusion-console .studio-fusion-ratio-head strong {
+  font-size: 24px;
+}
+.filmood-native .studio .studio-fusion-console .studio-fusion-weight input {
+  min-height: 35px;
+}
+.filmood-native .studio .studio-fusion-console .studio-fusion-launch {
+  width: 100%;
+  min-height: 56px;
+  margin-top: 14px;
+  border-radius: 11px;
+}
+.filmood-native .studio .studio-fusion-output .studio-feature-matches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto;
+  gap: 9px;
+  margin: 12px 0 0;
+}
+.filmood-native .studio .studio-fusion-output .studio-feature-matches button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 188px;
+  padding: 11px;
+  gap: 7px;
+  border-radius: 11px;
+}
+.filmood-native .studio .studio-fusion-output .studio-feature-match-poster {
+  width: 55px;
+  min-width: 55px;
+  height: 81px;
+}
+.filmood-native .studio .studio-fusion-output .studio-feature-matches button strong {
+  display: block;
+  font: 400 15px/1.18 Georgia, serif;
+}
+.filmood-native .studio .studio-fusion-output .studio-feature-matches button small {
+  display: none;
+}
+
+/* Standard results and My Cinema. */
+.filmood-native .studio .studio-workspace-head {
+  min-height: 36px;
+  padding: 0 2px 8px;
+  font-size: 11px;
+}
+.filmood-native .studio .studio-workspace .studio-columns:not(.lab) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.filmood-native .studio .studio-workspace .studio-columns:not(.lab) > section {
+  min-width: 0;
+  width: 100%;
+  padding: 15px 13px;
+  border-radius: 14px;
+}
+.filmood-native .studio .studio-workspace .studio-columns:not(.lab) .studio-controls h1 {
+  font-size: 29px;
+}
+.filmood-native .studio .studio-workspace .studio-columns:not(.lab) .studio-film {
+  display: grid;
+  grid-template-columns: 78px minmax(0, 1fr);
+  gap: 11px;
+  margin: 0 0 10px;
+  padding: 10px;
+  border-radius: 11px;
+}
+.filmood-native .studio .studio-workspace .studio-columns:not(.lab) .studio-poster {
+  width: 78px;
+  height: 117px;
+}
+.filmood-native .studio .studio-workspace .studio-columns:not(.lab) .studio-film h3 {
+  font-size: 17px;
+}
+.filmood-native .studio .studio-workspace .studio-film-actions {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.filmood-native .studio .studio-workspace .studio-film-actions button {
+  min-height: 34px;
+}
+.filmood-native .studio .studio-feature-screen .studio-feature-layout {
+  display: block;
+}
+.filmood-native .studio .studio-feature-screen .studio-feature-console,
+.filmood-native .studio .studio-feature-screen .studio-feature-output {
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 16px 14px;
+  border-radius: 13px;
+}
+.filmood-native .studio .studio-fingerprint-axes {
+  min-width: 0;
+}
+
+/* Full-height, scrollable native sheets; never hide close controls behind the notch. */
+.filmood-native .studio .studio-overlay,
+.filmood-native .studio .studio-services-backdrop {
+  z-index: 130;
+  padding: env(safe-area-inset-top) 0 0;
+  align-items: flex-end;
+}
+.filmood-native .studio .studio-film-detail-modal,
+.filmood-native .studio .studio-services-panel {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  max-height: calc(100dvh - env(safe-area-inset-top));
+  margin: 0;
+  padding: 22px 17px calc(24px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 22px 22px 0 0;
+}
+.filmood-native .studio .studio-film-detail-intro {
+  display: grid;
+  grid-template-columns: 95px minmax(0, 1fr);
+  gap: 14px;
+  padding: 22px 0 8px;
+}
+.filmood-native .studio .studio-film-detail-poster {
+  width: 95px;
+  min-width: 95px;
+  height: 143px;
+}
+.filmood-native .studio .studio-film-detail-copy h2 {
+  font-size: clamp(26px, 7vw, 34px);
+}
+.filmood-native .studio .studio-film-detail-meta,
+.filmood-native .studio .studio-film-detail-synopsis,
+.filmood-native .studio .studio-film-detail-vibe {
+  font-size: 12px;
+  line-height: 1.45;
+}
+.filmood-native .studio .studio-film-detail-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.filmood-native .studio .studio-film-detail-section {
+  padding: 13px;
+}
+.filmood-native .studio .studio-film-detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.filmood-native .studio .studio-film-detail-actions button {
+  min-height: 48px;
+}
+.filmood-native .studio .studio-services-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.filmood-native .studio .studio-services-heading h2 {
+  font-size: 31px;
+}
+
+/* The native credits route shares the safe-area spacing but not the bottom tabs. */
+.filmood-native .studio-credits-route {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.filmood-native .studio-credits-route .studio-credits-page {
+  padding: 20px 16px 35px;
+}
+.filmood-native .studio-credits-route .studio-credits-heading {
+  grid-template-columns: 95px minmax(0, 1fr);
+  gap: 14px;
+}
+.filmood-native .studio-credits-route .studio-credits-poster {
+  width: 95px;
+  height: 143px;
+}
+.filmood-native .studio-credits-route .studio-credits-heading h1 {
+  font-size: 29px;
+}
+.filmood-native .studio-credits-route .studio-credits-role-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (max-width: 370px) {
+  .filmood-native .studio-home .studio-experiments-grid {
+    grid-template-columns: 1fr;
+  }
+  .filmood-native .studio-home .studio-experiment-card {
+    min-height: 100px !important;
+  }
+  .filmood-native .studio .studio-columns.lab .studio-sliders {
+    grid-template-columns: 1fr;
+  }
+}
+@media (min-width: 720px) {
+  .filmood-native .studio-home .studio-hero,
+  .filmood-native .studio .studio-feature-screen,
+  .filmood-native .studio .studio-discovery-screen,
+  .filmood-native .studio .studio-workspace {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .filmood-native .studio-home .studio-mode-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .filmood-native .studio .studio-discovery-screen .studio-visual-moods {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filmood-native .studio *,
+  .filmood-native .studio *::before,
+  .filmood-native .studio *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
