@@ -112,7 +112,7 @@ function FilmSearchPicker({value,onSelect,onClear,label,placeholder="Search film
    return aPrefix-bPrefix||a.title.localeCompare(b.title);
   }).slice(0,8);
  },[query,recent]);
- const choose=(film:Film)=>{setQuery(film.title);setOpen(false);onSelect(film);};
+ const choose=(film:Film)=>{setQuery(film.title);setOpen(false);onSelect(film);input.current?.blur();};
  const selected=FILMS.find(f=>f.title===value);
  return <div className={"studio-film-picker studio-film-picker-"+variant} ref={root}>
   <label className="studio-film-picker-label" htmlFor={id}>{label}</label>
