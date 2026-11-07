@@ -353,7 +353,7 @@ export default function Studio(){
        <h2>{details.title}</h2>
        <p className="studio-film-detail-meta">{details.year} <span>·</span> {details.length} min <span>·</span> {details.genres.join(" / ")}</p>
        <p className="studio-film-detail-synopsis">{details.description}</p>
-       <p className="studio-film-detail-vibe">{sharedReason(details)}</p>
+       <p className="studio-film-detail-vibe">{sharedReason(details).replace(details.description,"").trim()}</p>
       </div>
      </div>
      <div className="studio-film-detail-sections">
