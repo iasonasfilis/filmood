@@ -77,9 +77,10 @@ const readable=(key:Axis,film:Film)=>AXES.find(a=>a.key===key)!.name.toLowerCase
 function FusionDnaIcon(){return <span className="studio-fusion-mark" aria-hidden="true"><Dna className="studio-fusion-strand studio-fusion-strand-left" size={23} strokeWidth={1.8}/><Dna className="studio-fusion-strand studio-fusion-strand-right" size={23} strokeWidth={1.8}/></span>}
 export default function Studio(){
  const [mode,setMode]=useState<Mode>("mood");
- const [fusionA,setFusionA]=useState("Arrival");
- const [fusionB,setFusionB]=useState("Parasite");
- const [fusionWeight,setFusionWeight]=useState(60);
+ const [fusionA,setFusionA]=useState("");
+ const [fusionB,setFusionB]=useState("");
+ const [fusionWeight,setFusionWeight]=useState(50);
+ const [fusionShowResults,setFusionShowResults]=useState(false);
  const [situation,setSituation]=useState("Any occasion");
  const [view,setView]=useState<View>("start");
  const [moods,setMoods]=useState<string[]>([]);
@@ -116,6 +117,7 @@ export default function Studio(){
  useEffect(()=>{try{const s=localStorage.getItem(STORAGE);if(s){const p=JSON.parse(s);if(Array.isArray(p.saved))setSaved(p.saved);if(Array.isArray(p.watched))setWatched(p.watched);if(Array.isArray(p.passed))setPassed(p.passed);if(Array.isArray(p.liked))setLiked(p.liked);if(Array.isArray(p.subscribed))setSubscribed(p.subscribed);}}catch{}setLoaded(true);},[]);
  useEffect(()=>{if(loaded){try{localStorage.setItem(STORAGE,JSON.stringify({saved,watched,passed,liked,subscribed}));}catch{}}},[saved,watched,passed,liked,subscribed,loaded]);
  const fusionDNA=AXES.reduce((a,axis)=>{const first=FILMS.find(f=>f.title===fusionA)?.dna||FILMS[0].dna;const second=FILMS.find(f=>f.title===fusionB)?.dna||FILMS[12].dna;a[axis.key]=Math.round(first[axis.key]*fusionWeight/100+second[axis.key]*(100-fusionWeight)/100);return a;},{} as DNA);
+ const fusionReady=Boolean(fusionA&&fusionB&&fusionA!==fusionB);
  const fingerprint=useMemo(()=>{const films=FILMS.filter(f=>liked.includes(f.id)||watched.includes(f.id));if(!films.length)return null;return AXES.reduce((a,axis)=>{a[axis.key]=Math.round(films.reduce((sum,f)=>sum+f.dna[axis.key]*(liked.includes(f.id)?2:1),0)/films.reduce((sum,f)=>sum+(liked.includes(f.id)?2:1),0));return a;},{} as DNA);},[liked,watched]);
  const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
  const moodDNA=AXES.reduce((acc,axis)=>{const selected=MOOD_PRESETS.filter(m=>moods.includes(m.label));acc[axis.key]=selected.length?Math.round(selected.reduce((sum,m)=>sum+m.target[axis.key],0)/selected.length):50;return acc;},{} as DNA);
@@ -209,11 +211,30 @@ export default function Studio(){
      </aside>
     </div>
   </section>}
-  {view==="fusion"&&<section className="studio-feature-screen studio-experiment">
-    <button className="studio-feature-back" onClick={()=>setView("start")}><ArrowLeft size={16}/> Back to discovery</button>
-    <div className="studio-feature-banner studio-fusion-banner"><span>FILM DNA FUSION / EXPERIMENT NO. 002</span><h1>Two films.<br/><em>One new feeling.</em></h1><p>Blend the cinematic DNA of two stories. Discover the unexpected space between them.</p><div className="studio-feature-steps"><span>01 · PICK TWO FILMS</span><span>02 · FIND THE BALANCE</span><span>03 · DISCOVER THE FUSION</span></div></div>
-    <div className="studio-feature-layout"><div className="studio-feature-console"><span className="studio-eyebrow">THE FUSION DESK</span><h2>Mix your influences.</h2><p>Choose two films and decide how much of each to keep.</p><div className="studio-fusion-controls"><label>FILM 01<select value={fusionA} onChange={e=>setFusionA(e.target.value)}>{FILMS.map(f=><option key={f.id}>{f.title}</option>)}</select></label><label>FILM 02<select value={fusionB} onChange={e=>setFusionB(e.target.value)}>{FILMS.map(f=><option key={f.id}>{f.title}</option>)}</select></label></div><div className="studio-fusion-balance"><span>{fusionWeight}% <small>{fusionA}</small></span><span>{100-fusionWeight}% <small>{fusionB}</small></span></div><label className="studio-fusion-weight"><input aria-label="Balance the two films" type="range" min="0" max="100" value={fusionWeight} onChange={e=>setFusionWeight(Number(e.target.value))}/></label><div className="studio-fusion-dna">{AXES.map(a=><div key={a.key}><span>{a.name}</span><div><i style={{width:fusionDNA[a.key]+"%"}}/></div><strong>{fusionDNA[a.key]}</strong></div>)}</div><a className="studio-primary studio-fusion-results-link" href="#fusion-results">See fusion matches <ArrowRight size={18}/></a></div>
-    <div id="fusion-results" className="studio-feature-output"><span className="studio-eyebrow">YOUR FUSION RESULTS</span><h2>Somewhere between.</h2><p>Six films closest to your blended DNA, from our current demo catalog.</p><div className="studio-feature-matches">{FILMS.filter(f=>f.title!==fusionA&&f.title!==fusionB).map(f=>({f,score:matchPercentage(f,fusionDNA)})).sort((a,b)=>b.score-a.score).slice(0,6).map(({f,score},i)=><button key={f.id} onClick={()=>{setDetails(f);setCreditsOpen(false);}}><span className="studio-feature-match-rank">{String(i+1).padStart(2,"0")} / FUSION PICK</span><div className="studio-feature-match-poster">{f.poster?<img src={"https://image.tmdb.org/t/p/w342/"+f.poster} alt="" loading="lazy"/>:<span>{f.title.slice(0,1)}</span>}</div><div><strong>{f.title}</strong><span>{score}% DNA MATCH</span><small>{f.description}</small></div></button>)}</div></div></div>
+  {view==="fusion"&&<section className="studio-feature-screen studio-experiment studio-fusion-screen">
+    <button className="studio-feature-back" onClick={()=>setView("start")}><ArrowLeft size={16}/> Back to home</button>
+    <div className="studio-feature-banner studio-fusion-banner studio-fusion-banner-compact"><span>FILM DNA FUSION</span><h1>Two films. <em>One new feeling.</em></h1><p>Pick two films, choose their balance and discover where their cinematic DNA meets.</p></div>
+    <div className="studio-feature-layout">
+     <div className="studio-feature-console studio-fusion-console">
+      <span className="studio-eyebrow">01 / CHOOSE TWO FILMS</span>
+      <h2>Create your fusion.</h2>
+      <div className="studio-fusion-controls">
+       <label>FIRST FILM<select aria-label="First film" value={fusionA} onChange={e=>setFusionA(e.target.value)}><option value="">Choose a film…</option>{FILMS.map(f=><option key={f.id} value={f.title}>{f.title}</option>)}</select></label>
+       <span className="studio-fusion-plus">+</span>
+       <label>SECOND FILM<select aria-label="Second film" value={fusionB} onChange={e=>setFusionB(e.target.value)}><option value="">Choose a film…</option>{FILMS.map(f=><option key={f.id} value={f.title}>{f.title}</option>)}</select></label>
+      </div>
+      <div className="studio-fusion-ratio-head"><span className="studio-eyebrow">02 / FIND THE BALANCE</span><strong>{fusionWeight}% <span>/</span> {100-fusionWeight}%</strong></div>
+      <div className="studio-fusion-balance"><span>{fusionA||"First film"}</span><span>{fusionB||"Second film"}</span></div>
+      <label className="studio-fusion-weight"><input aria-label="Balance the two films" type="range" min="0" max="100" value={fusionWeight} disabled={!fusionReady} onChange={e=>setFusionWeight(Number(e.target.value))}/></label>
+      {fusionA&&fusionB&&fusionA===fusionB&&<p className="studio-fusion-validation">Choose two different films to create a fusion.</p>}
+      <button type="button" className="studio-primary studio-fusion-launch" disabled={!fusionReady} onClick={()=>setFusionShowResults(true)}><FusionDnaIcon/> Fuse these films <ArrowRight size={19}/></button>
+      <details className="studio-fusion-advanced"><summary>Explore the eight DNA ingredients</summary><div className="studio-fusion-dna">{AXES.map(a=><div key={a.key}><span>{a.name}</span><div><i style={{width:fusionDNA[a.key]+"%"}}/></div><strong>{fusionDNA[a.key]}</strong></div>)}</div></details>
+     </div>
+     <div id="fusion-results" className="studio-feature-output studio-fusion-output">
+      {fusionReady&&fusionShowResults?<><span className="studio-eyebrow">YOUR FUSION RESULTS</span><h2>Somewhere between.</h2><p>Six films closest to your combined cinematic DNA.</p><div className="studio-feature-matches">{FILMS.filter(f=>f.title!==fusionA&&f.title!==fusionB).map(f=>({f,score:matchPercentage(f,fusionDNA)})).sort((a,b)=>b.score-a.score).slice(0,6).map(({f,score},i)=><button key={f.id} onClick={()=>{setDetails(f);setCreditsOpen(false);}}><span className="studio-feature-match-rank">{String(i+1).padStart(2,"0")} / FUSION PICK</span><div className="studio-feature-match-poster">{f.poster?<img src={"https://image.tmdb.org/t/p/w342/"+f.poster} alt="" loading="lazy"/>:<span>{f.title.slice(0,1)}</span>}</div><div><strong>{f.title}</strong><span>{score}% DNA MATCH</span><small>{f.description}</small></div></button>)}</div></>
+      :<div className="studio-fusion-empty"><FusionDnaIcon/><span className="studio-eyebrow">YOUR FUSION AWAITS</span><h2>Two stories.<br/>One discovery.</h2><p>Select two different films, adjust their balance and press <strong>Fuse these films</strong> to reveal your matches.</p></div>}
+     </div>
+    </div>
    </section>}
   {view==="fingerprint"&&<section className="studio-feature-screen studio-experiment">
     <button className="studio-feature-back" onClick={()=>setView("start")}><ArrowLeft size={16}/> Back to discovery</button>
@@ -222,24 +243,24 @@ export default function Studio(){
    </section>}
   {(view==="results"||view==="lab")&&<section className="studio-workspace">
    <div className="studio-workspace-head"><button onClick={()=>setView("start")}><ArrowLeft size={15}/> Back to home</button><span>{view==="lab"?"THE FILM LAB.":"YOUR DISCOVERY"}</span><button onClick={()=>enterLab()} disabled={view==="lab"}><SlidersHorizontal size={16}/> Remix</button></div>
-   {view==="lab"&&<div className="studio-lab-banner"><span>THE FILM LAB / EXPERIMENT NO. 001</span><h2>Rewrite the feeling.<br/><em>Keep the magic.</em></h2><p>Eight cinematic ingredients. Endless ways to change the atmosphere. Drag, remix, discover.</p><div className="studio-lab-steps"><span>01 · CHOOSE A FILM</span><span>02 · REMIX ITS DNA</span><span>03 · DISCOVER YOUR CUT</span></div></div>}
+   {view==="lab"&&<div className="studio-lab-banner studio-lab-banner-compact"><div><span>THE FILM LAB</span><h2>Build your cinematic recipe.</h2><p>Choose a starting film, adjust eight ingredients and watch your matches change live.</p></div><FlaskConical size={34}/></div>}
    <div className={view==="lab"?"studio-columns lab":"studio-columns"}>
     <section className="studio-controls">
      {view==="lab"?<>
-       <p className="studio-eyebrow">THE MIXING DESK</p><h1>Your cinematic recipe.</h1><p className="studio-muted">Change the ingredients. The film selection responds as you experiment.</p>
+       <p className="studio-eyebrow">YOUR MIXING DESK</p><h1>Make it yours.</h1><p className="studio-muted">Move the sliders. Your film matches update instantly.</p>
        <div className="studio-base"><label htmlFor="base-film">YOUR BASE RECIPE</label><select id="base-film" value={reference} onChange={e=>changeReference(e.target.value)}>{[...REFERENCES.map(r=>r.name),...FILMS.map(f=>f.title).filter(name=>!REFERENCES.some(r=>r.name===name))].map(name=><option key={name}>{name}</option>)}</select><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
-       <div className="studio-lab-meter"><span>YOUR CURRENT MIX</span><strong>{Math.round(AXES.reduce((n,a)=>n+mix[a.key],0)/AXES.length)}<small> / 100</small></strong><p>Average intensity across your eight ingredients</p></div><div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
+       <p className="studio-lab-slider-heading">EIGHT CINEMATIC INGREDIENTS</p><div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
      </>:<>
        <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."}</p><h1>We found your kind of films.</h1><p className="studio-muted">{mode==="mood"?"A few picks for the feeling you're after.":"Inspired by "+reference+" and its emotional signature."}</p>
        <div className="studio-summary studio-reference-summary">{mode==="filmood"&&<div className="studio-reference-poster">{FILMS.find(f=>f.title===reference)?.poster?<img src={"https://image.tmdb.org/t/p/w185/"+FILMS.find(f=>f.title===reference)?.poster} alt={reference+" poster"}/>:<span>{reference.slice(0,1)}</span>}</div>}<div className="studio-reference-copy"><small>{mode==="filmood"?"YOUR STARTING FILM":"YOUR MOOD MIX"}</small><strong>{mode==="mood"?moods.join(" + "):"Inspired by "+reference}</strong>{situation!=="Any occasion"&&<span>{situation}</span>}</div><button onClick={()=>setView("play")}>Change</button></div>
        <button className="studio-lab-invite" onClick={()=>enterLab()}><FlaskConical size={19}/> These are close. Want to experiment? <ArrowRight size={16}/></button>
      </>}
-     <div className="studio-more"><label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>
+     <details className="studio-advanced-filters"><summary>Advanced viewing filters</summary><div className="studio-more"><label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>
       <h3>Explore a little further</h3>
       <div className="studio-fields"><label>Film length<select value={runtime} onChange={e=>setRuntime(e.target.value)}><option>Any length</option><option>Under 100 min</option><option>100–140 min</option><option>Over 140 min</option></select></label>
        <label>Cinema<select value={region} onChange={e=>setRegion(e.target.value)}><option>Anywhere</option><option>American</option><option>European</option><option>Asian</option><option>World</option></select></label></div>
       <label className="studio-axis discovery"><span><strong>Familiar ↔ Hidden gems</strong><output>{depth<34?"Familiar":depth>67?"Deep cuts":"Balanced"}</output></span><input type="range" min="0" max="100" value={depth} onChange={e=>setDepth(Number(e.target.value))}/></label>
-     </div>
+     </div></details>
     </section>
     <section className="studio-results">
 <div className="studio-row"><div><p className="studio-eyebrow">LIVE RESULTS</p><h2>{view==="lab"?"The director’s cut":"Your films for tonight"}</h2></div><span className="studio-live"><i/>LIVE</span></div>
