@@ -2,6 +2,12 @@
    A single, final layout layer for the four discovery experiences.
    Keeps the core controls and six recommendations above the fold on normal desktop screens. */
 
+/* The legacy select-picker shell adds 30px padding + 20px margins to every
+   searchable picker, silently doubling the Lab/Fusion control heights. */
+.studio .studio-film-picker{
+  margin:0;padding:0;background:transparent;border:0;border-radius:0;
+}
+
 /* MOOD and FILMOOD share the Film Lab / Fusion visual hierarchy. */
 .studio .studio-discovery-screen{
   width:100%;max-width:none;min-height:0;
