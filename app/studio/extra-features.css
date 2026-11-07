@@ -63,3 +63,50 @@
  .studio-home .studio-experiment-card{min-height:103px}
  .studio-home .studio-footer{padding:14px 16px}
 }
+
+/* Navigation: one personal entry in the top-right; discovery tools live in the drawer. */
+.studio .studio-nav{display:grid;grid-template-columns:minmax(42px,1fr) auto minmax(42px,1fr);align-items:center;gap:16px}
+.studio .studio-menu-toggle{grid-column:1;justify-self:start}
+.studio .studio-word{grid-column:2;justify-self:center}
+.studio .studio-nav nav{grid-column:3;justify-self:end;display:flex;align-items:center}
+.studio .studio-nav nav .studio-account-nav{display:inline-flex;align-items:center;gap:10px;white-space:nowrap;padding:9px 12px;border:1px solid #e6c1d42b;border-radius:9px;background:#ffffff08;color:#e7c8d8!important;font-size:12px;letter-spacing:.1em}
+.studio .studio-nav nav .studio-account-nav:hover{background:#ffffff14;border-color:#e6c1d46e}
+
+/* A distinctive pair of DNA strands converging into one for Film DNA Fusion. */
+.studio-fusion-mark{position:relative;display:inline-block;width:43px;height:34px;flex:none;color:inherit}
+.studio-fusion-mark .studio-fusion-strand{position:absolute;top:5px;width:23px;height:23px;color:inherit}
+.studio-fusion-mark .studio-fusion-strand-left{left:0;transform:rotate(-22deg)}
+.studio-fusion-mark .studio-fusion-strand-right{right:0;transform:rotate(22deg)}
+.studio-fusion-mark:after{content:"";position:absolute;left:19px;top:15px;width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor}
+.studio .studio-experiment-blend .studio-experiment-icon{width:50px}
+.studio .studio-experiment-icon .studio-fusion-mark svg{width:23px;height:23px}
+.studio-site-drawer .studio-fusion-mark{width:24px;height:22px;transform:scale(.62);transform-origin:left center;margin-right:-7px}
+.studio-site-drawer .studio-fusion-mark .studio-fusion-strand{color:#d9b5c8}
+
+/* Compact hierarchy: the two primary choices remain larger, experiments are slim. */
+.studio-home .studio-hero{padding-top:clamp(12px,2vh,24px);padding-bottom:clamp(12px,2vh,24px)}
+.studio-home .studio-mode{min-height:clamp(135px,17vh,165px);padding:clamp(16px,1.7vw,25px);gap:6px}
+.studio-home .studio-mode>svg:first-child{width:23px;height:23px}
+.studio-home .studio-mode strong{font-size:clamp(28px,2.5vw,42px)}
+.studio-home .studio-mode>span{font-size:clamp(12px,.9vw,14px);line-height:1.35}
+.studio-home .studio-mode-arrow{width:20px;height:20px}
+.studio-home .studio-experiments-heading{margin:12px 0 8px}
+.studio-home .studio-experiment-card{min-height:84px;padding:12px 18px;display:grid;grid-template-columns:50px minmax(0,1fr) 20px;grid-template-rows:auto auto;column-gap:14px;row-gap:3px;align-content:center}
+.studio-home .studio-experiment-icon{grid-column:1;grid-row:1/3;width:45px;height:45px}
+.studio-home .studio-experiment-card strong{grid-column:2;grid-row:1;font-size:clamp(21px,1.8vw,29px);line-height:1.08}
+.studio-home .studio-experiment-card small{grid-column:2;grid-row:2;font-size:clamp(11px,.8vw,12px);line-height:1.3}
+.studio-home .studio-experiment-action{grid-column:3;grid-row:1/3;align-self:center;margin:0;padding:0}
+@media(min-width:900px) and (max-height:770px){
+ .studio-home .studio-mode{min-height:125px;padding:14px 20px}
+ .studio-home .studio-experiment-card{min-height:76px;padding:9px 16px}
+ .studio-home .studio-experiments-heading{margin:8px 0 6px}
+}
+@media(max-width:700px){
+ .studio .studio-nav{grid-template-columns:1fr auto 1fr;gap:8px}
+ .studio .studio-nav nav .studio-account-nav{padding:8px;font-size:0;gap:0}
+ .studio .studio-nav nav .studio-account-nav svg{width:20px;height:20px}
+ .studio-home .studio-mode{min-height:140px}
+ .studio-home .studio-experiment-card{min-height:82px;padding:11px 13px}
+ .studio-home .studio-experiment-card strong{font-size:21px}
+ .studio-home .studio-experiment-card small{font-size:11px}
+}
