@@ -251,3 +251,18 @@
  .studio .studio-fusion-plus{padding:0;line-height:1}
  .studio .studio-fusion-output .studio-feature-matches{grid-template-columns:1fr}
 }
+
+/* Stretch the inline prompt across the full discovery column. */
+.studio .studio-play-refined .studio-chat-inline{align-self:stretch;width:100%}
+@media(min-width:1101px) and (max-height:740px){
+ .studio .studio-play-refined{padding-top:10px;padding-bottom:10px}
+ .studio .studio-play-refined .studio-back-link{margin-bottom:8px}
+ .studio .studio-play-refined .studio-play-intro{margin-bottom:12px}
+ .studio .studio-play-refined .studio-visual-mood{min-height:112px}
+ .studio .studio-discover-panel{min-height:300px}
+ .studio .studio-filmood-picker{min-height:185px}
+ .studio .studio-lab-banner-compact{padding:13px 22px;margin:9px 0}
+ .studio .studio-columns.lab .studio-sliders{gap:10px 19px}
+ .studio .studio-fusion-banner-compact{padding:13px 22px;margin-bottom:10px}
+ .studio .studio-fusion-console,.studio .studio-fusion-output{min-height:350px}
+}
