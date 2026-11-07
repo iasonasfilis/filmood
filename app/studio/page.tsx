@@ -221,12 +221,12 @@ export default function Studio(){
  const moodDNA=AXES.reduce((acc,axis)=>{const selected=MOOD_PRESETS.filter(m=>moods.includes(m.label));acc[axis.key]=selected.length?Math.round(selected.reduce((sum,m)=>sum+m.target[axis.key],0)/selected.length):50;return acc;},{} as DNA);
  const target=view==="lab"?mix:view==="fusion"?fusionDNA:chatTarget|| (mode==="filmood"?referenceDNA:moodDNA);
  const results=useMemo(()=>FILMS.filter(f=>!passed.includes(f.id)&&!watched.includes(f.id))
-  .filter(f=>mode!=="filmood"||f.title!==reference)
+  .filter(f=>view==="lab"?(labBase==="Custom mix"||f.title!==labBase):(mode!=="filmood"||f.title!==reference))
   .filter(f=>region==="Anywhere"||f.region===region)
   .filter(f=>runtime==="Any length"||(runtime==="Under 100 min"?f.length<100:runtime==="100–140 min"?f.length>=100&&f.length<=140:f.length>140))
   .map(f=>({film:f,score:distance(f,target)+(liked.includes(f.id)?-16:0)+((depth-50)/50)*(f.dna.indie-50)*-.35}))
   .sort((a,b)=>matchPercentage(b.film,target)-matchPercentage(a.film,target)||a.score-b.score||a.film.id-b.film.id).slice(0,6).map(x=>x.film),
-  [mode,reference,region,runtime,depth,passed,watched,liked,target]);
+  [view,labBase,mode,reference,region,runtime,depth,passed,watched,liked,target]);
  const launch=()=>{if(mode==="mood"&&moods.length===0&&!chatTarget)return;if(mode==="filmood"&&!filmSelected)return;setMix({...target});navigate("results");};
  // Enter discovers from the page; inputs, dialogs and other controls keep their native Enter behavior.
  useEffect(()=>{if(view!=="play")return;const onEnter=(event:KeyboardEvent)=>{if(event.key!=="Enter"||event.repeat||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||menuOpen||providerOpen||details)return;const node=event.target;if(node instanceof Element&&node.closest("input,textarea,select,button,a,[role=dialog],[contenteditable=true]"))return;event.preventDefault();launch();};window.addEventListener("keydown",onEnter);return()=>window.removeEventListener("keydown",onEnter);},[view,launch,menuOpen,providerOpen,details]);
