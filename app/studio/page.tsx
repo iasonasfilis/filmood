@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Bookmark, Check, Clapperboard, Search, FlaskConical, Heart, RotateCcw, SlidersHorizontal, Sparkles, Dna, Fingerprint, Tv, Menu, UserRound, LogIn, LogOut, Shield, FileText, Info, Users, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Bookmark, Check, Clapperboard, Search, FlaskConical, Heart, RotateCcw, SlidersHorizontal, Sparkles, Dna, Fingerprint, Tv, House, Menu, UserRound, LogIn, LogOut, Shield, FileText, Info, Users, X } from "lucide-react";
 import "./studio.css";
 import { interpretFilmate } from "./filmate-lite";
 import "./filmood-discovery.css";
 import "./discovery-layout.css";
 import "./extra-features.css";
 import "./compact-experiences.css";
+import "./mobile-native.css";
 import { FILMS, type Film } from "./film-data";
 
 type Axis = "dark" | "pace" | "emotion" | "mind" | "visual" | "indie" | "humor" | "action";
@@ -51,6 +52,7 @@ const HOME_BACKDROPS=[
  {title:"Parasite",image:"TU9NIjwzjoKPwQHoHshkFcQUCG.jpg"}
 ] as const;
 const STORAGE="filmood-studio-v1";
+const IS_NATIVE_BUILD=process.env.NEXT_PUBLIC_FILMOOD_NATIVE==="1";
 const defaultReference="Arrival";
 const neutralDNA=AXES.reduce((acc,axis)=>{acc[axis.key]=50;return acc;},{} as DNA);
 const clamp=(n:number)=>Math.max(0,Math.min(100,n));
@@ -126,6 +128,8 @@ export default function Studio(){
  const [fusionB,setFusionB]=useState("");
  const [fusionWeight,setFusionWeight]=useState(50);
  const [fusionShowResults,setFusionShowResults]=useState(false);
+ const [nativeFusionPanel,setNativeFusionPanel]=useState<"mix"|"matches">("mix");
+ const [nativeLabPanel,setNativeLabPanel]=useState<"mix"|"matches">("mix");
  const [situation,setSituation]=useState("Any occasion");
  const [view,setView]=useState<View>("start");
  const [moods,setMoods]=useState<string[]>([]);
@@ -217,11 +221,30 @@ export default function Studio(){
  const chooseMode=(next:Mode)=>{if(next==="mood")setMoods([]);if(next==="filmood")setFilmSelected(false);setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);navigate("play",next);};
  const chooseMood=(label:string)=>{setMoods(prev=>prev.includes(label)?(prev.filter(x=>x!==label)):[...prev,label]);setChatTarget(null);};
  const sendChat=()=>{const input=chatInput.trim();if(!input||(mode==="filmood"&&!filmSelected))return;setFilmateError("");const base=chatTarget||(mode==="mood"?moodDNA:referenceDNA);const analysis=interpretFilmate(input,base,FILMS.map(f=>f.title),chatHistory.length);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:analysis.reply}]);setChatInput("");setChatTarget(analysis.dna);setMix(analysis.dna);navigate("results");};
- const enterLab=(film?:Film)=>{if(film){setReference(film.title);setLabBase(film.title);setMix({...film.dna});setMode("filmood");}else{setLabBase("Custom mix");setMix(view==="start"?{...neutralDNA}:{...target});}navigate("lab",film?"filmood":mode);};
+ const enterLab=(film?:Film)=>{setNativeLabPanel(film?"matches":"mix");if(film){setReference(film.title);setLabBase(film.title);setMix({...film.dna});setMode("filmood");}else{setLabBase("Custom mix");setMix(view==="start"?{...neutralDNA}:{...target});}navigate("lab",film?"filmood":mode);};
  const chooseSearchFilm=(film:Film)=>{changeReference(film.title);setFilmSelected(true);setChatTarget(null);setRecentFilmSearches(previous=>{const next=[film.title,...previous.filter(x=>x!==film.title)].slice(0,8);try{localStorage.setItem("filmood-recent-film-searches",JSON.stringify(next));}catch{}return next;});};
  const changeReference=(value:string)=>{setReference(value);setMix({...(REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||REFERENCES[0].dna)});};
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
  const reset=()=>{setMix({...(labBase==="Custom mix"?neutralDNA:(REFERENCES.find(r=>r.name===labBase)?.dna||FILMS.find(f=>f.title===labBase)?.dna||neutralDNA))});setRegion("Anywhere");setRuntime("Any length");setDepth(52);};
+ // Capacitor's Android hardware back button respects FILMOOD dialogs and history.
+ useEffect(()=>{
+  if(!IS_NATIVE_BUILD)return;
+  const handle=(event:Event)=>{
+   if(menuOpen){event.preventDefault();setMenuOpen(false);return;}
+   if(providerOpen){event.preventDefault();setProviderOpen(false);return;}
+   if(details){event.preventDefault();closeDetails();return;}
+   if(view==="lab"&&nativeLabPanel==="matches"){event.preventDefault();setNativeLabPanel("mix");return;}
+   if(view==="fusion"&&nativeFusionPanel==="matches"){event.preventDefault();setNativeFusionPanel("mix");return;}
+   if(view!=="start"){
+    event.preventDefault();
+    if(window.history.state?.filmood&&window.history.length>1)window.history.back();
+    else navigate("start");
+   }
+  };
+  window.addEventListener("filmood:native-back",handle);
+  return()=>window.removeEventListener("filmood:native-back",handle);
+ },[view,menuOpen,providerOpen,details,nativeLabPanel,nativeFusionPanel]);
+
  const sharedReason=(f:Film)=>{const closer=AXES.map(a=>({key:a.key,name:readable(a.key,f),delta:Math.abs(f.dna[a.key]-target[a.key])})).sort((a,b)=>a.delta-b.delta).slice(0,2).map(a=>a.name).join(" and ");const differences=AXES.map(a=>({name:a.name.toLowerCase(),delta:f.dna[a.key]-target[a.key]})).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));const contrast=differences[0];return "The vibe match: "+closer+". Compared with your mix, "+f.title+" leans "+(contrast.delta>0?"more ":"less ")+contrast.name+". "+f.description;};
  return <main className={"studio"+(view==="start"?" studio-home":"")}>
   <header className="studio-nav"><button className="studio-menu-toggle" aria-label="Open site menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(true)}><Menu size={23}/></button>
@@ -286,20 +309,24 @@ export default function Studio(){
   {view==="fusion"&&<section className="studio-feature-screen studio-experiment studio-fusion-screen">
     <button className="studio-feature-back" onClick={()=>navigate("start")}><ArrowLeft size={16}/> Back to home</button>
     <div className="studio-feature-banner studio-fusion-banner studio-fusion-banner-compact"><span>FILM DNA FUSION</span><h1>Two films. <em>One new feeling.</em></h1><p>Pick two films, choose their balance and discover where their cinematic DNA meets.</p></div>
-    <div className="studio-feature-layout">
+    {IS_NATIVE_BUILD&&<div className="studio-native-segmented" role="tablist" aria-label="Film DNA Fusion sections">
+     <button type="button" role="tab" aria-selected={nativeFusionPanel==="mix"} onClick={()=>setNativeFusionPanel("mix")}>Combine films</button>
+     <button type="button" role="tab" aria-selected={nativeFusionPanel==="matches"} onClick={()=>setNativeFusionPanel("matches")}>Your matches</button>
+    </div>}
+    <div className={"studio-feature-layout native-panel-"+nativeFusionPanel}>
      <div className="studio-feature-console studio-fusion-console">
       <span className="studio-eyebrow">01 / CHOOSE TWO FILMS</span>
       <h2>Create your fusion.</h2>
       <div className="studio-fusion-controls">
-       <FilmSearchPicker label="FIRST FILM" placeholder="Search first film…" value={fusionA} recent={recentFilmSearches} onSelect={f=>{setFusionA(f.title);setFusionShowResults(false);}} onClear={()=>{setFusionA("");setFusionShowResults(false);}}/>
+       <FilmSearchPicker label="FIRST FILM" placeholder="Search first film…" value={fusionA} recent={recentFilmSearches} onSelect={f=>{setFusionA(f.title);setFusionShowResults(false);setNativeFusionPanel("mix");}} onClear={()=>{setFusionA("");setFusionShowResults(false);setNativeFusionPanel("mix");}}/>
        <span className="studio-fusion-plus">+</span>
-       <FilmSearchPicker label="SECOND FILM" placeholder="Search second film…" value={fusionB} recent={recentFilmSearches} onSelect={f=>{setFusionB(f.title);setFusionShowResults(false);}} onClear={()=>{setFusionB("");setFusionShowResults(false);}}/>
+       <FilmSearchPicker label="SECOND FILM" placeholder="Search second film…" value={fusionB} recent={recentFilmSearches} onSelect={f=>{setFusionB(f.title);setFusionShowResults(false);setNativeFusionPanel("mix");}} onClear={()=>{setFusionB("");setFusionShowResults(false);setNativeFusionPanel("mix");}}/>
       </div>
       <div className="studio-fusion-ratio-head"><span className="studio-eyebrow">02 / FIND THE BALANCE</span><strong>{fusionWeight}% <span>/</span> {100-fusionWeight}%</strong></div>
       <div className="studio-fusion-balance"><span>{fusionA||"First film"}</span><span>{fusionB||"Second film"}</span></div>
       <label className="studio-fusion-weight"><input aria-label="Balance the two films" type="range" min="0" max="100" value={fusionWeight} disabled={!fusionReady} onChange={e=>setFusionWeight(Number(e.target.value))}/></label>
       {fusionA&&fusionB&&fusionA===fusionB&&<p className="studio-fusion-validation">Choose two different films to create a fusion.</p>}
-      <button type="button" className="studio-primary studio-fusion-launch" disabled={!fusionReady} onClick={()=>setFusionShowResults(true)}><FusionDnaIcon/> Fuse these films <ArrowRight size={19}/></button>
+      <button type="button" className="studio-primary studio-fusion-launch" disabled={!fusionReady} onClick={()=>{setFusionShowResults(true);setNativeFusionPanel("matches");}}><FusionDnaIcon/> Fuse these films <ArrowRight size={19}/></button>
       <details className="studio-fusion-advanced"><summary>Explore the eight DNA ingredients</summary><div className="studio-fusion-dna">{AXES.map(a=><div key={a.key}><span>{a.name}</span><div><i style={{width:fusionDNA[a.key]+"%"}}/></div><strong>{fusionDNA[a.key]}</strong></div>)}</div></details>
      </div>
      <div id="fusion-results" className="studio-feature-output studio-fusion-output">
@@ -316,11 +343,15 @@ export default function Studio(){
   {(view==="results"||view==="lab")&&<section className="studio-workspace">
    <div className="studio-workspace-head"><button onClick={()=>navigate("start")}><ArrowLeft size={15}/> Back to home</button><span>{view==="lab"?"THE FILM LAB.":"YOUR DISCOVERY"}</span><button onClick={()=>enterLab()} disabled={view==="lab"}><SlidersHorizontal size={16}/> Remix</button></div>
    {view==="lab"&&<div className="studio-lab-banner studio-lab-banner-compact"><div><span>THE FILM LAB</span><h2>Build your cinematic recipe.</h2><p>Start from scratch or choose a film, then adjust eight ingredients. Matches update live.</p></div><FlaskConical size={34}/></div>}
-   <div className={view==="lab"?"studio-columns lab":"studio-columns"}>
+   {IS_NATIVE_BUILD&&view==="lab"&&<div className="studio-native-segmented" role="tablist" aria-label="Film Lab sections">
+    <button type="button" role="tab" aria-selected={nativeLabPanel==="mix"} onClick={()=>setNativeLabPanel("mix")}>Your recipe</button>
+    <button type="button" role="tab" aria-selected={nativeLabPanel==="matches"} onClick={()=>setNativeLabPanel("matches")}>Director’s cut</button>
+   </div>}
+   <div className={view==="lab"?"studio-columns lab native-panel-"+nativeLabPanel:"studio-columns"}>
     <section className="studio-controls">
      {view==="lab"?<>
        <p className="studio-eyebrow">YOUR MIXING DESK</p><h1>Make it yours.</h1><p className="studio-muted">Move the sliders. Your film matches update instantly.</p>
-       <div className="studio-base studio-lab-base-search"><FilmSearchPicker label="CHOOSE BASE FILM" placeholder="Search for a base film…" value={labBase==="Custom mix"?"":labBase} recent={recentFilmSearches} onSelect={f=>{setLabBase(f.title);setReference(f.title);setMix({...f.dna});}} onClear={()=>{setLabBase("Custom mix");setMix({...neutralDNA});}} onCustom={()=>{setLabBase("Custom mix");setMix({...neutralDNA});}}/><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
+       <div className="studio-base studio-lab-base-search"><FilmSearchPicker label="CHOOSE BASE FILM" placeholder="Search for a base film…" value={labBase==="Custom mix"?"":labBase} recent={recentFilmSearches} onSelect={f=>{setLabBase(f.title);setReference(f.title);setMix({...f.dna});setNativeLabPanel("matches");}} onClear={()=>{setLabBase("Custom mix");setMix({...neutralDNA});setNativeLabPanel("mix");}} onCustom={()=>{setLabBase("Custom mix");setMix({...neutralDNA});}}/><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
        <p className="studio-lab-slider-heading">EIGHT CINEMATIC INGREDIENTS</p><div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
      </>:<>
        <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."}</p><h1>We found your kind of films.</h1><p className="studio-muted">{mode==="mood"?"A few picks for the feeling you're after.":"Inspired by "+reference+" and its emotional signature."}</p>
@@ -377,6 +408,13 @@ export default function Studio(){
      <p className="studio-film-detail-footnote">Cinematic DNA values and vibe matches are illustrative estimates. Film artwork is credited to TMDB.</p>
     </section>
    </div>}
+  {IS_NATIVE_BUILD&&<nav className="studio-native-tabs" aria-label="Main app navigation">
+   <button type="button" aria-current={view==="start"?"page":undefined} onClick={()=>navigate("start")}><House size={21}/><span>Home</span></button>
+   <button type="button" aria-current={view==="play"&&mode==="mood"?"page":undefined} onClick={()=>chooseMode("mood")}><Heart size={21}/><span>Mood</span></button>
+   <button type="button" aria-current={view==="play"&&mode==="filmood"?"page":undefined} onClick={()=>chooseMode("filmood")}><Clapperboard size={21}/><span>Filmood</span></button>
+   <button type="button" aria-current={view==="lab"?"page":undefined} onClick={()=>enterLab()}><FlaskConical size={21}/><span>Lab</span></button>
+   <button type="button" aria-current={view==="fusion"?"page":undefined} onClick={()=>{setNativeFusionPanel("mix");navigate("fusion");}}><Dna size={21}/><span>Fusion</span></button>
+  </nav>}
   <footer className="studio-footer"><span>FILMOOD. · Some feelings deserve another film.</span><span>Prototype · Estimated DNA · Unverified streaming availability</span><a href="/about">Artwork via TMDB · Credits</a><a href="/">Back to main site</a></footer>
  </main>;
 }
