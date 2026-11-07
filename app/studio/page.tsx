@@ -94,7 +94,7 @@ function FilmSearchPicker({value,onSelect,onClear,label,placeholder="Search film
  const root=useRef<HTMLDivElement>(null);
  const input=useRef<HTMLInputElement>(null);
  const id=useId();
- useEffect(()=>setQuery(value),[value]);
+ useEffect(()=>{if(!open)setQuery(value);},[value,open]);
  useEffect(()=>{
   const dismiss=(event:PointerEvent)=>{if(root.current&&!root.current.contains(event.target as Node))setOpen(false);};
   document.addEventListener("pointerdown",dismiss);
