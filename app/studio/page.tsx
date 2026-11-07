@@ -103,6 +103,7 @@ export default function Studio(){
  const [liked,setLiked]=useState<number[]>([]);
  const [providerOpen,setProviderOpen]=useState(false);
  const [menuOpen,setMenuOpen]=useState(false);
+ const [showFilmPreferences,setShowFilmPreferences]=useState(false);
  const [searchCategory,setSearchCategory]=useState<"films"|"people">("films");
  const [creditsOpen,setCreditsOpen]=useState(false);
  const [details,setDetails]=useState<Film|null>(null);
@@ -178,21 +179,22 @@ export default function Studio(){
     <button className="studio-back-link" onClick={()=>setView("start")}><ArrowLeft size={16}/> Choose another experience</button>
     <p className="studio-eyebrow">{mode==="mood"?"01 / MOOD.":"02 / FILMOOD."} — YOUR CINEMATIC PLAYGROUND</p>
     <h1>{mode==="mood"?"What does tonight feel like?":"A film is never just a film."}</h1>
-    <p className="studio-play-intro">{mode==="mood"?"Choose a visual atmosphere or describe what you're craving. No questionnaire.":"Pick a film that stayed with you. Then tell us what you want to feel again — or just discover."}</p>
+    <p className="studio-play-intro">{mode==="mood"?"Choose a visual atmosphere or describe what you're craving. No questionnaire.":"Choose a film. Discover what to watch next."}</p>
     <div className="studio-discovery-columns"><div className="studio-discovery-primary">{mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();launch();}}}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"ADD TO YOUR MIX"} <ArrowRight size={14}/></span></button>)}</div>
-    :<div className="studio-filmood-discovery">
-      <div className="studio-filmood-top"><div><span>YOUR CINEMATIC STARTING POINT</span><h2>Six films. One feeling.</h2><p>Inspired by <strong>{reference}</strong>. Ordered by DNA match.</p></div><span className="studio-six-count">06 / FILMS</span></div>
-      <button type="button" className="studio-filmood-search studio-search-launch" onClick={()=>{setFilmQuery("");setFilmSearchOpen(true);setFilmSearchFocus(true);}}><span>SEARCH A FILM · LIVE POSTER RESULTS</span><strong><Search size={20}/> Search any film in our catalog…</strong><small>Tap to search by title. Results appear as you type.</small></button>
-      <div className="studio-filmood-six">{filmSuggestions.map((f,i)=><button key={f.id} className="studio-filmood-tile" onClick={()=>{changeReference(f.title);setFilmQuery("");setChatTarget(null);}} aria-label={"Find films inspired by "+f.title}><div className="studio-filmood-art">{f.poster?<img src={"https://image.tmdb.org/t/p/w500/"+f.poster} alt="" loading="lazy"/>:<span>{f.title.slice(0,1)}</span>}<small>{String(i+1).padStart(2,"0")}</small></div><strong>{f.title}</strong><span>{f.year} · {matchPercentage(f,referenceDNA)}% DNA</span></button>)}</div>
+    :<div className="studio-filmood-discovery studio-filmood-simple">
+      <div className="studio-filmood-simple-heading"><span>YOUR STARTING FILM</span><h2>Start with a film you love.</h2><p>We'll find something with a similar feeling.</p></div>
+      <div className="studio-filmood-current"><div className="studio-filmood-current-poster">{FILMS.find(f=>f.title===reference)?.poster?<img src={"https://image.tmdb.org/t/p/w185/"+FILMS.find(f=>f.title===reference)?.poster} alt={reference+" poster"}/>:<span>{reference.slice(0,1)}</span>}</div><div className="studio-filmood-current-text"><small>SELECTED FILM</small><strong>{reference}</strong><span>{FILMS.find(f=>f.title===reference)?.year} · Your cinematic starting point</span></div><button type="button" onClick={()=>{setFilmQuery("");setSearchCategory("films");setFilmSearchOpen(true);setFilmSearchFocus(true);}}><Search size={18}/> Change film</button></div>
+      <button type="button" className="studio-filmood-browse" onClick={()=>{setFilmQuery("");setSearchCategory("films");setFilmSearchOpen(true);setFilmSearchFocus(true);}}><Search size={19}/> Search films by title <ArrowRight size={17}/></button>
      </div>}
     {mode==="mood"&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} {moods.length>1?"×":"✓"}</button>)}</div><small>Every selected mood contributes equally to the cinematic DNA used for recommendations.</small></div>}
-    <label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>
+    <button type="button" className="studio-optional-toggle" aria-expanded={showFilmPreferences} onClick={()=>setShowFilmPreferences(v=>!v)}>{showFilmPreferences?"− Hide optional preferences":"+ Add viewing occasion (optional)"}</button>
+    {showFilmPreferences&&<label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>}
     <div className="studio-play-actions"><button className="studio-primary" disabled={mode==="mood"&&moods.length===0&&!chatTarget} onClick={launch}>Discover films <ArrowRight size={18}/></button></div></div>
-    <aside className="studio-chat-panel"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Tell FILMOOD what you're looking for</strong><small>Say anything, your way · Demo keyword interpretation, not connected to AI yet</small></div></div>
+    <aside className="studio-chat-panel studio-chat-panel-clean"><div className="studio-chat-top"><Sparkles size={18}/><div><strong>Refine your recommendations</strong><small>Optional · Describe the feeling you want</small></div></div>
     {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
     {filmateError&&<p className="studio-filmmate-error" role="alert">{filmateError}</p>}
     <form onSubmit={e=>{e.preventDefault();void sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Something beautiful, melancholic and a little mysterious…":"Like Arrival, but darker, stranger and more intense…"} /><button type="submit" disabled={!chatInput.trim()} aria-label="Ask Filmate"><ArrowRight size={20}/></button></form>
-    <p className="studio-filmmate-note">Filmate Lite runs locally — no API key, no external AI. It understands selected film preferences and keywords, not unrestricted human conversation.</p></aside></div>
+    <p className="studio-filmmate-note">Optional text refinement · Keyword-based prototype</p></aside></div>
   </section>}
   {view==="fusion"&&<section className="studio-feature-screen studio-experiment">
     <button className="studio-feature-back" onClick={()=>setView("start")}><ArrowLeft size={16}/> Back to discovery</button>
