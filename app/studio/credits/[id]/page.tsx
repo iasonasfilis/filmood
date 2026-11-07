@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { findFilmById } from "../../film-data";
+import { FILMS, findFilmById } from "../../film-data";
 import { VERIFIED_CREDITS, type CreditRole } from "../../credits-data";
 import "../../studio.css";
 import "../../extra-features.css";
+import "../../mobile-native.css";
+
+// Required for Capacitor's fully static export of /studio/credits/[id]/.
+export function generateStaticParams() {
+ return FILMS.map(film=>({id:String(film.id)}));
+}
 
 const ROLES:CreditRole[]=["Cast","Direction","Writing","Cinematography","Editing","Music","Production"];
 
