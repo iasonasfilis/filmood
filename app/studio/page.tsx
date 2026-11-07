@@ -236,7 +236,7 @@ export default function Studio(){
     <button className="studio-primary studio-services-done" onClick={()=>setProviderOpen(false)}>Save my selection <Check size={17}/></button>
    </section></div>}
   {view==="start"&&<section className="studio-hero">
-   <div className="studio-cinema-backdrop studio-cinema-carousel" aria-hidden="true">{HOME_BACKDROPS.map((frame,i)=><div key={frame.title} className={"studio-cinema-frame"+(backdropIndex===i?" is-active":"")} style={{backgroundImage:"url(https://image.tmdb.org/t/p/w1280/"+frame.image)}}/>)}</div>
+   <div className="studio-cinema-backdrop studio-cinema-carousel" aria-hidden="true">{HOME_BACKDROPS.map((frame,i)=><div key={frame.title} className={"studio-cinema-frame"+(backdropIndex===i?" is-active":"")} style={{backgroundImage:"url(https://image.tmdb.org/t/p/w1280/"+frame.image+")"}}/>)}</div>
    <p className="studio-eyebrow">FILMOOD ORIGINAL DISCOVERY EXPERIENCE</p>
    <h1>Some feelings deserve<br/><em>another film.</em></h1>
    <p className="studio-lead">A cinematic experience built around what moves you. Pick a direction. The discovery begins on the next screen.</p>
