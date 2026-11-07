@@ -69,6 +69,7 @@ const PROVIDERS=[
 ];
 const STORAGE="filmood-studio-v1";
 const defaultReference="Arrival";
+const neutralDNA=AXES.reduce((acc,axis)=>{acc[axis.key]=50;return acc;},{} as DNA);
 const clamp=(n:number)=>Math.max(0,Math.min(100,n));
 const distance=(film:Film,target:DNA)=>AXES.reduce((total,a)=>total+Math.abs(film.dna[a.key]-target[a.key])*({emotion:1.25,mind:1.2,visual:1.0,dark:1.05,pace:1.0,indie:.75,humor:.85,action:.85} as Record<Axis,number>)[a.key],0);
 const MATCH_WEIGHTS:Record<Axis,number>={emotion:1.25,mind:1.2,visual:1,dark:1.05,pace:1,indie:.75,humor:.85,action:.85};
@@ -95,7 +96,8 @@ export default function Studio(){
  const [recentFilmSearches,setRecentFilmSearches]=useState<string[]>([]);
  const [filmSearchFocus,setFilmSearchFocus]=useState(false);
  const [keep,setKeep]=useState<string[]>(["Atmosphere","Emotional feeling"]);
- const [mix,setMix]=useState<DNA>({...REFERENCES[0].dna});
+ const [mix,setMix]=useState<DNA>({...neutralDNA});
+ const [labBase,setLabBase]=useState("Custom mix");
  const [region,setRegion]=useState("Anywhere");
  const [runtime,setRuntime]=useState("Any length");
  const [depth,setDepth]=useState(52);
@@ -136,12 +138,12 @@ export default function Studio(){
  const chooseMode=(next:Mode)=>{if(next==="mood")setMoods([]);if(next==="filmood")setFilmSelected(false);setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);setFilmQuery("");setView("play");};
  const chooseMood=(label:string)=>{setMoods(prev=>prev.includes(label)?(prev.filter(x=>x!==label)):[...prev,label]);setChatTarget(null);};
  const sendChat=()=>{const input=chatInput.trim();if(!input||(mode==="filmood"&&!filmSelected))return;setFilmateError("");const base=chatTarget||(mode==="mood"?moodDNA:referenceDNA);const analysis=interpretFilmate(input,base,FILMS.map(f=>f.title),chatHistory.length);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:analysis.reply}]);setChatInput("");setChatTarget(analysis.dna);setMix(analysis.dna);setView("results");};
- const enterLab=(film?:Film)=>{if(film){setReference(film.title);setMix({...film.dna});setMode("filmood");}else setMix({...target});setView("lab");};
+ const enterLab=(film?:Film)=>{if(film){setReference(film.title);setLabBase(film.title);setMix({...film.dna});setMode("filmood");}else{setLabBase("Custom mix");setMix(view==="start"?{...neutralDNA}:{...target});}setView("lab");};
  const chooseSearchFilm=(film:Film)=>{changeReference(film.title);setFilmSelected(true);setChatTarget(null);setFilmQuery("");setFilmSearchOpen(false);setFilmSearchFocus(false);setRecentFilmSearches(previous=>{const next=[film.title,...previous.filter(x=>x!==film.title)].slice(0,8);try{localStorage.setItem("filmood-recent-film-searches",JSON.stringify(next));}catch{}return next;});};
  const liveFilmSearch=useMemo(()=>{const q=filmQuery.trim().toLocaleLowerCase();if(!q)return [];return FILMS.map(f=>({f,title:f.title.toLocaleLowerCase()})).filter(({title})=>title.includes(q)).sort((a,b)=>{const ar=a.title.startsWith(q)?0:1;const br=b.title.startsWith(q)?0:1;return ar-br||a.title.indexOf(q)-b.title.indexOf(q)||a.f.title.localeCompare(b.f.title);}).slice(0,15).map(x=>x.f);},[filmQuery]);
  const changeReference=(value:string)=>{setReference(value);setMix({...(REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||REFERENCES[0].dna)});};
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
- const reset=()=>{setMix({...referenceDNA});setRegion("Anywhere");setRuntime("Any length");setDepth(52);};
+ const reset=()=>{setMix({...labBase==="Custom mix"?neutralDNA:REFERENCES.find(r=>r.name===labBase)?.dna||FILMS.find(f=>f.title===labBase)?.dna||neutralDNA});setRegion("Anywhere");setRuntime("Any length");setDepth(52);};
  const sharedReason=(f:Film)=>{const closer=AXES.map(a=>({key:a.key,name:readable(a.key,f),delta:Math.abs(f.dna[a.key]-target[a.key])})).sort((a,b)=>a.delta-b.delta).slice(0,2).map(a=>a.name).join(" and ");const differences=AXES.map(a=>({name:a.name.toLowerCase(),delta:f.dna[a.key]-target[a.key]})).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));const contrast=differences[0];return "The vibe match: "+closer+". Compared with your mix, "+f.title+" leans "+(contrast.delta>0?"more ":"less ")+contrast.name+". "+f.description;};
  return <main className={"studio"+(view==="start"?" studio-home":"")}>
   <header className="studio-nav"><button className="studio-menu-toggle" aria-label="Open site menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(true)}><Menu size={23}/></button>
@@ -243,12 +245,12 @@ export default function Studio(){
    </section>}
   {(view==="results"||view==="lab")&&<section className="studio-workspace">
    <div className="studio-workspace-head"><button onClick={()=>setView("start")}><ArrowLeft size={15}/> Back to home</button><span>{view==="lab"?"THE FILM LAB.":"YOUR DISCOVERY"}</span><button onClick={()=>enterLab()} disabled={view==="lab"}><SlidersHorizontal size={16}/> Remix</button></div>
-   {view==="lab"&&<div className="studio-lab-banner studio-lab-banner-compact"><div><span>THE FILM LAB</span><h2>Build your cinematic recipe.</h2><p>Choose a starting film, adjust eight ingredients and watch your matches change live.</p></div><FlaskConical size={34}/></div>}
+   {view==="lab"&&<div className="studio-lab-banner studio-lab-banner-compact"><div><span>THE FILM LAB</span><h2>Build your cinematic recipe.</h2><p>Start from scratch or choose a film, then adjust eight ingredients. Matches update live.</p></div><FlaskConical size={34}/></div>}
    <div className={view==="lab"?"studio-columns lab":"studio-columns"}>
     <section className="studio-controls">
      {view==="lab"?<>
        <p className="studio-eyebrow">YOUR MIXING DESK</p><h1>Make it yours.</h1><p className="studio-muted">Move the sliders. Your film matches update instantly.</p>
-       <div className="studio-base"><label htmlFor="base-film">YOUR BASE RECIPE</label><select id="base-film" value={reference} onChange={e=>changeReference(e.target.value)}>{[...REFERENCES.map(r=>r.name),...FILMS.map(f=>f.title).filter(name=>!REFERENCES.some(r=>r.name===name))].map(name=><option key={name}>{name}</option>)}</select><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
+       <div className="studio-base"><label htmlFor="base-film">YOUR STARTING RECIPE</label><select id="base-film" value={labBase} onChange={e=>{const value=e.target.value;setLabBase(value);setMix({...(value==="Custom mix"?neutralDNA:REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||neutralDNA)});}}><option value="Custom mix">Custom recipe · Start from scratch</option>{[...REFERENCES.map(r=>r.name),...FILMS.map(f=>f.title).filter(name=>!REFERENCES.some(r=>r.name===name))].map(name=><option key={name}>{name}</option>)}</select><button onClick={reset} title="Reset recipe"><RotateCcw size={16}/> Reset</button></div>
        <p className="studio-lab-slider-heading">EIGHT CINEMATIC INGREDIENTS</p><div className="studio-sliders">{AXES.map(a=><label key={a.key} className="studio-axis"><span><strong>{a.name}</strong><output>{mix[a.key]}/100</output></span><input type="range" min="0" max="100" step="1" value={mix[a.key]} onChange={e=>setMix(x=>({...x,[a.key]:clamp(Number(e.target.value))}))}/><span className="studio-limits"><small>{a.low}</small><small>{a.high}</small></span></label>)}</div>
      </>:<>
        <p className="studio-eyebrow">{mode==="mood"?"MOOD.":"FILMOOD."}</p><h1>We found your kind of films.</h1><p className="studio-muted">{mode==="mood"?"A few picks for the feeling you're after.":"Inspired by "+reference+" and its emotional signature."}</p>
