@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { findFilmById } from "../../../film-data";
-import { VERIFIED_CREDITS, type CreditRole } from "../../../credits-data";
-import "../../../studio.css";
-import "../../../extra-features.css";
+import { findFilmById } from "../../film-data";
+import { VERIFIED_CREDITS, type CreditRole } from "../../credits-data";
+import "../../studio.css";
+import "../../extra-features.css";
 
 const ROLES:CreditRole[]=["Cast","Direction","Writing","Cinematography","Editing","Music","Production"];
 
