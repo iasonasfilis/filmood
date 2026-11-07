@@ -28,7 +28,12 @@ jobs:
         with:
           distribution: temurin
           java-version: "21"
-      - uses: android-actions/setup-android@v3
+      # Ubuntu runners already include Android SDK command-line tools.
+      # setup-android@v3 tries to install the removed legacy "tools" package.
+      - name: Install Android SDK components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
       - name: Install JavaScript dependencies
         run: npm install --no-audit --no-fund
       - name: Export and generate Android project
