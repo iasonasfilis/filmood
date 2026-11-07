@@ -410,8 +410,8 @@ export default function Studio(){
    </div>}
   {IS_NATIVE_BUILD&&<nav className="studio-native-tabs" aria-label="Main app navigation">
    <button type="button" aria-current={view==="start"?"page":undefined} onClick={()=>navigate("start")}><House size={21}/><span>Home</span></button>
-   <button type="button" aria-current={view==="play"&&mode==="mood"?"page":undefined} onClick={()=>chooseMode("mood")}><Heart size={21}/><span>Mood</span></button>
-   <button type="button" aria-current={view==="play"&&mode==="filmood"?"page":undefined} onClick={()=>chooseMode("filmood")}><Clapperboard size={21}/><span>Filmood</span></button>
+   <button type="button" aria-current={(view==="play"||view==="results")&&mode==="mood"?"page":undefined} onClick={()=>chooseMode("mood")}><Heart size={21}/><span>Mood</span></button>
+   <button type="button" aria-current={(view==="play"||view==="results")&&mode==="filmood"?"page":undefined} onClick={()=>chooseMode("filmood")}><Clapperboard size={21}/><span>Filmood</span></button>
    <button type="button" aria-current={view==="lab"?"page":undefined} onClick={()=>enterLab()}><FlaskConical size={21}/><span>Lab</span></button>
    <button type="button" aria-current={view==="fusion"?"page":undefined} onClick={()=>{setNativeFusionPanel("mix");navigate("fusion");}}><Dna size={21}/><span>Fusion</span></button>
   </nav>}
