@@ -1,0 +1,23 @@
+/* FILMOOD discovery layout — isolated stylesheet */
+.studio .studio-filmood-discovery{display:block;width:100%;max-width:1200px;margin:30px auto 40px;clear:both}
+.studio .studio-filmood-top{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:26px}
+.studio .studio-filmood-top h2{font:400 clamp(30px,4vw,56px)/1.12 Georgia,serif;letter-spacing:-.04em;margin:12px 0}
+.studio .studio-filmood-top p{font-size:15px;line-height:1.6;color:#c3b8c4}
+.studio .studio-filmood-top>div>span,.studio .studio-filmood-search label{font-size:11px;letter-spacing:2px;color:#e8c1b0}
+.studio .studio-filmood-six{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;align-items:start;gap:16px;width:100%;margin:0;padding:0}
+.studio .studio-filmood-tile{display:flex!important;flex-direction:column;gap:7px;min-width:0;width:100%;padding:0;border:0;background:transparent;text-align:left;color:#f5eef3;cursor:pointer}
+.studio .studio-filmood-art{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:auto;aspect-ratio:2/3;overflow:hidden;border-radius:8px;border:1px solid #ffffff33;background:linear-gradient(145deg,#413041,#17121c);transition:transform .2s,border-color .2s}
+.studio .studio-filmood-art img{display:block;width:100%!important;height:100%!important;max-width:100%;max-height:100%;position:absolute;inset:0;object-fit:cover}
+.studio .studio-filmood-art>span{font:400 60px Georgia,serif;color:#b9a0bb}
+.studio .studio-filmood-art small{position:absolute;top:8px;left:8px;background:#100b12dd;color:white;border-radius:4px;padding:5px 8px;font-size:11px}
+.studio .studio-filmood-tile:hover .studio-filmood-art{transform:translateY(-5px);border-color:#e8c1b0}
+.studio .studio-filmood-tile>strong{display:block;font:400 17px/1.25 Georgia,serif;overflow-wrap:anywhere;margin-top:4px}
+.studio .studio-filmood-tile>span{display:block;font-size:11px;color:#d7b5ad}
+.studio .studio-filmood-search{display:block;margin-top:32px;padding:24px;background:#221c27;border:1px solid #ffffff32;border-radius:10px}
+.studio .studio-filmood-search input{display:block;width:100%;background:#100d15;color:#fff;border:1px solid #ffffff55;border-radius:6px;padding:15px;margin-top:12px;font-size:16px}
+.studio .studio-filmood-search p{font-size:12px;color:#b9aeba;margin:10px 0 0}
+.studio .studio-filmood-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.studio .studio-filmood-suggestions button{padding:9px 12px;border:1px solid #ffffff44;background:#ffffff10;color:white;border-radius:5px}
+.studio .studio-filmood-actions{display:flex;justify-content:flex-end;margin-top:22px}
+@media(max-width:1000px){.studio .studio-filmood-six{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:550px){.studio .studio-filmood-six{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px}.studio .studio-filmood-top{align-items:start}.studio .studio-filmood-top h2{font-size:34px}.studio .studio-filmood-search{padding:15px}}

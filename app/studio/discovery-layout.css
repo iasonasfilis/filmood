@@ -1,0 +1,32 @@
+/* Compact split-screen discovery: search and cards visible without scrolling */
+.studio .studio-play{max-width:1600px;padding:20px 30px 50px;min-height:calc(100vh - 75px)}
+.studio .studio-back-link{margin-bottom:16px}
+.studio .studio-play h1{font-size:clamp(30px,3.2vw,52px);margin:7px 0}
+.studio .studio-play-intro{margin:5px 0 20px;font-size:14px;line-height:1.4}
+.studio .studio-discovery-columns{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(300px,.85fr);align-items:start;gap:20px}
+.studio .studio-discovery-primary{min-width:0}
+.studio .studio-visual-moods{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.studio .studio-visual-mood{min-height:165px;padding:14px}
+.studio .studio-visual-mood strong{font-size:clamp(20px,2vw,28px)}
+.studio .studio-mood-mix{margin-top:12px;padding:12px}
+.studio .studio-mood-mix>div{margin:8px 0}
+.studio .studio-chat-panel{position:sticky;top:90px;margin:0;min-height:350px;padding:22px}
+.studio .studio-chat-compose{margin-top:18px}
+.studio .studio-chat-compose input{font-size:13px}
+.studio .studio-ai-label{display:inline-block;margin-left:5px;font:700 9px Arial,sans-serif;letter-spacing:1px;color:#eac0a9}
+.studio .studio-filmmate-note{font-size:11px;color:#b5aab8;line-height:1.5;margin-top:18px}
+.studio .studio-filmmate-error{color:#ffb6ae;font-size:12px;line-height:1.5}
+.studio .studio-filmood-discovery{margin:0;width:100%}
+.studio .studio-filmood-top{margin-bottom:8px}
+.studio .studio-filmood-top h2{font-size:clamp(25px,2.5vw,38px);margin:4px 0}
+.studio .studio-filmood-top p{font-size:12px;margin:0}
+.studio .studio-filmood-search{margin:12px 0 14px;padding:12px 15px}
+.studio .studio-filmood-search input{margin-top:7px;padding:10px;font-size:14px}
+.studio .studio-filmood-search p{margin-top:6px;font-size:10px}
+.studio .studio-filmood-six{gap:10px}
+.studio .studio-filmood-tile>strong{font-size:13px;margin:4px 0 0}
+.studio .studio-filmood-tile>span{font-size:10px}
+.studio .studio-play-actions{margin-top:14px}
+.studio .studio-play-actions .studio-primary{padding:12px 20px}
+@media(max-width:1000px){.studio .studio-discovery-columns{grid-template-columns:1fr}.studio .studio-chat-panel{position:static;min-height:0}.studio .studio-filmood-six{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media(max-width:600px){.studio .studio-play{padding:16px}.studio .studio-visual-moods{grid-template-columns:repeat(2,minmax(0,1fr))}.studio .studio-visual-mood{min-height:150px}.studio .studio-filmood-six{grid-template-columns:repeat(3,minmax(0,1fr))!important}.studio .studio-filmood-art>span{font-size:30px}}
