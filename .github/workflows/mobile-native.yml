@@ -19,6 +19,9 @@ jobs:
     name: Android debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,8 +35,10 @@ jobs:
       # setup-android@v3 tries to install the removed legacy "tools" package.
       - name: Install Android SDK components
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -path '*/bin/sdkmanager' -type f | sort -V | tail -1)"
+          if [ -z "$SDKMANAGER" ]; then echo "Android SDK manager not found"; exit 1; fi
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
       - name: Install JavaScript dependencies
         run: npm install --no-audit --no-fund
       - name: Export and generate Android project
