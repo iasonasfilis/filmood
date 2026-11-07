@@ -264,6 +264,16 @@ html.filmood-native body {
   display: none;
 }
 
+/* Mobile navigation is provided by the bottom tabs and hardware/gesture back. */
+.filmood-native .studio:not(.studio-credits-route) .studio-feature-back,
+.filmood-native .studio:not(.studio-credits-route) .studio-back-link,
+.filmood-native .studio .studio-workspace-head > button:first-child {
+  display: none;
+}
+.filmood-native .studio .studio-workspace-head {
+  justify-content: space-between;
+}
+
 /* Reusable compact page banners and touch-friendly controls. */
 .filmood-native .studio .studio-feature-back,
 .filmood-native .studio .studio-back-link,
