@@ -166,7 +166,7 @@ export default function Studio(){
    image?.complete&&image.naturalWidth>0?[index]:[]
   );
   if(ready.length)setLoadedBackdrops(previous=>
-   [...new Set([...previous,...ready])].sort((a,b)=>a-b)
+   Array.from(new Set<number>([...previous,...ready])).sort((a,b)=>a-b)
   );
  },[]);
  const [details,setDetails]=useState<Film|null>(null);
