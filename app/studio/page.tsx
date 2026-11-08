@@ -217,6 +217,7 @@ export default function Studio(){
  const fusionReady=Boolean(fusionA&&fusionB&&fusionA!==fusionB);
  const labReady=labBase!=="Custom mix"||AXES.some(a=>mix[a.key]!==50);
  const fingerprint=useMemo(()=>{const films=FILMS.filter(f=>liked.includes(f.id)||watched.includes(f.id));if(!films.length)return null;return AXES.reduce((a,axis)=>{a[axis.key]=Math.round(films.reduce((sum,f)=>sum+f.dna[axis.key]*(liked.includes(f.id)?2:1),0)/films.reduce((sum,f)=>sum+(liked.includes(f.id)?2:1),0));return a;},{} as DNA);},[liked,watched]);
+ const discoveryFilm=filmSelected?FILMS.find(f=>f.title===reference):undefined;
  const referenceDNA=REFERENCES.find(r=>r.name===reference)?.dna||FILMS.find(f=>f.title===reference)?.dna||REFERENCES[0].dna;
  const moodDNA=AXES.reduce((acc,axis)=>{const selected=MOOD_PRESETS.filter(m=>moods.includes(m.label));acc[axis.key]=selected.length?Math.round(selected.reduce((sum,m)=>sum+m.target[axis.key],0)/selected.length):50;return acc;},{} as DNA);
  const target=view==="lab"?mix:view==="fusion"?fusionDNA:chatTarget|| (mode==="filmood"?referenceDNA:moodDNA);
@@ -269,32 +270,52 @@ export default function Studio(){
   </section>}
   {view==="play"&&<section className={"studio-play studio-play-refined studio-experiment studio-discovery-screen studio-discovery-"+mode}>
     <button className="studio-back-link studio-feature-back" onClick={()=>navigate("start")}><ArrowLeft size={16}/> Back to home</button>
-    <div className="studio-feature-banner studio-discovery-banner">
-     <span>{mode==="mood"?"MOOD.":"FILMOOD."} / FIND YOUR NEXT FILM</span>
-     <h1>{mode==="mood"?"What does tonight feel like?":"Start with a film you love."}</h1>
-     <p className="studio-play-intro">{mode==="mood"?"Choose one or more moods, or describe the feeling you want.":"Choose your starting film. We'll find its cinematic relatives."}</p>
+    <div className="studio-feature-banner studio-discovery-banner studio-discovery-banner-compact">
+     <span>{mode==="mood"?"MOOD. / FEELING FIRST":"FILMOOD. / FILM FIRST"}</span>
+     <h1>{mode==="mood"?<>Start with a feeling. <em>Find your film.</em></>:<>One film. <em>A whole new world.</em></>}</h1>
+     <p className="studio-play-intro">{mode==="mood"?"Choose the emotions you want tonight. We'll turn them into your next cinematic discovery.":"Choose a film that stayed with you. Discover stories that share its cinematic DNA."}</p>
     </div>
-    <div className="studio-discovery-columns">
-     <div className="studio-discovery-primary studio-discovery-console">
-      {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)} onKeyDown={e=>{if(e.key==="Enter"&&moods.length>0){e.preventDefault();launch();}}}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"ADD TO YOUR MIX"} <ArrowRight size={14}/></span></button>)}</div>
+    <div className="studio-discovery-columns studio-feature-layout">
+     <div className="studio-discovery-primary studio-discovery-console studio-feature-console">
+      <span className="studio-eyebrow">{mode==="mood"?"01 / CHOOSE YOUR FEELINGS":"01 / CHOOSE YOUR FILM"}</span>
+      <h2>{mode==="mood"?"Set the tone.":"The starting frame."}</h2>
+      <p className="studio-discovery-helper">{mode==="mood"?"Select as many moods as you like. Every combination tells a different story.":"Search the collection and pick the film you want to build on."}</p>
+      {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"+ ADD FEELING"} <ArrowRight size={14}/></span></button>)}</div>
       :<div className="studio-filmood-discovery studio-filmood-simple">
         <FilmSearchPicker variant="hero" label="YOUR STARTING FILM" value={filmSelected?reference:""} placeholder="Find a film…" recent={recentFilmSearches} onSelect={chooseSearchFilm} onClear={()=>{setFilmSelected(false);setChatTarget(null);}}/>
-        <p className="studio-filmood-picker-help">{filmSelected?"Your film is selected. Search again to change it.":"Start typing a film title. Results appear as you type."}</p>
+        <p className="studio-filmood-picker-help">{filmSelected?"Selected. You can search again to change the film.":"Start typing a title to explore the current film collection."}</p>
        </div>}
-      {mode==="mood"&&moods.length>0&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} ×</button>)}</div></div>}
-      <aside className="studio-chat-panel studio-chat-panel-clean studio-chat-inline"><div className="studio-chat-top"><Sparkles size={19}/><div><strong>Describe your ideal film</strong><small>{mode==="filmood"&&!filmSelected?"Choose a starting film first":"Optional · Refine your recommendations with words"}</small></div></div>
+      {mode==="mood"&&moods.length>0&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button type="button" key={m} onClick={()=>chooseMood(m)} title={"Remove "+m}>{m} ×</button>)}</div></div>}
+      {mode==="filmood"&&<div className="studio-discovery-steps" aria-label="How FILMOOD works"><span><b>01</b> Choose a film</span><span><b>02</b> Shape the feeling</span><span><b>03</b> Discover six</span></div>}
+      <aside className="studio-chat-panel studio-chat-panel-clean studio-chat-inline">
+       <div className="studio-chat-top"><Sparkles size={19}/><div><strong>Add your own twist.</strong><small>{mode==="filmood"&&!filmSelected?"Choose a film to unlock this":"Optional · Describe the atmosphere you want"}</small></div></div>
        {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
        {filmateError&&<p className="studio-filmmate-error" role="alert">{filmateError}</p>}
        <form onSubmit={e=>{e.preventDefault();sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} disabled={mode==="filmood"&&!filmSelected} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Beautiful, melancholic, a little mysterious…":filmSelected?"Like this film, but darker and stranger…":"Select a film to unlock refinement"} /><button type="submit" disabled={!chatInput.trim()||(mode==="filmood"&&!filmSelected)} aria-label="Refine recommendations"><ArrowRight size={20}/></button></form>
       </aside>
      </div>
-     <aside className="studio-discover-panel studio-discovery-output">
-      <button type="button" className="studio-primary studio-discover-cta" disabled={mode==="mood"?moods.length===0&&!chatTarget:!filmSelected} onClick={launch}><span>Discover films</span><ArrowRight size={32}/></button>
+     <aside className="studio-discover-panel studio-discovery-output studio-feature-output">
+      <span className="studio-eyebrow">02 / YOUR CINEMATIC DIRECTION</span>
+      <h2>{mode==="mood"?"Your next feeling.":"The film's aftertaste."}</h2>
+      <p className="studio-discovery-output-intro">{mode==="mood"?"Your selections shape the atmosphere of your next watch.":"A new discovery, rooted in the story you already love."}</p>
+      <div className={"studio-discovery-preview-art"+(mode==="mood"?" studio-discovery-preview-mood mood-"+Math.max(0,MOOD_PRESETS.findIndex(m=>m.label===moods[0])):" studio-discovery-preview-film")}>
+       {mode==="filmood"&&filmSelected&&discoveryFilm?.poster&&<div className="studio-discovery-preview-poster"><img src={"https://image.tmdb.org/t/p/w342/"+discoveryFilm.poster} alt="" onError={e=>{e.currentTarget.style.display="none";}}/></div>}
+       <div className="studio-discovery-preview-copy" aria-live="polite">
+        <span>{mode==="mood"?"YOUR ATMOSPHERE":"YOUR STARTING POINT"}</span>
+        <strong>{mode==="mood"?(moods.length?moods[0]:"A blank canvas."):(filmSelected?reference:"A story to begin with.")}</strong>
+        <small>{mode==="mood"?(moods.length>1?"+ "+(moods.length-1)+" more feeling"+(moods.length===2?"":"s"):"A feeling worth exploring"):(filmSelected?discoveryFilm?.year+" · "+discoveryFilm?.genres.slice(0,2).join(" / "):"Search for a film to set the scene")}</small>
+       </div>
+      </div>
+      <div className="studio-discovery-preview-facts">
+       <div><span>{mode==="mood"?"FEELINGS SELECTED":"STARTING FILM"}</span><strong>{mode==="mood"?String(moods.length).padStart(2,"0"):(filmSelected?"01":"00")}</strong></div>
+       <div><span>DISCOVERIES AHEAD</span><strong>06</strong></div>
+      </div>
       <div className="studio-discover-meta">
-       <p>{mode==="mood"?"Your mood mix becomes six film recommendations.":"Six recommendations inspired by your starting film."}</p>
-       <button type="button" className="studio-optional-toggle" aria-expanded={showFilmPreferences} onClick={()=>setShowFilmPreferences(v=>!v)}>{showFilmPreferences?"− Hide viewing occasion":"+ Viewing occasion (optional)"}</button>
+       <button type="button" className="studio-optional-toggle" aria-expanded={showFilmPreferences} onClick={()=>setShowFilmPreferences(v=>!v)}>{showFilmPreferences?"− Hide viewing occasion":"+ Add a viewing occasion"}</button>
        {showFilmPreferences&&<label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>}
       </div>
+      <button type="button" className="studio-primary studio-discover-cta" disabled={mode==="mood"?moods.length===0&&!chatTarget:!filmSelected} onClick={launch}><span>Discover my films</span><ArrowRight size={23}/></button>
+      <p className="studio-discovery-output-note">Six film picks from the current {FILMS.length}-film preview collection.</p>
      </aside>
     </div>
   </section>}
