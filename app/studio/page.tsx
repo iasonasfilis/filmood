@@ -7,6 +7,7 @@ import "./filmood-discovery.css";
 import "./discovery-layout.css";
 import "./extra-features.css";
 import "./compact-experiences.css";
+import "./studio-polish.css";
 import { FILMS, type Film } from "./film-data";
 
 type Axis = "dark" | "pace" | "emotion" | "mind" | "visual" | "indie" | "humor" | "action";
@@ -151,9 +152,24 @@ export default function Studio(){
  const [menuOpen,setMenuOpen]=useState(false);
  const [showFilmPreferences,setShowFilmPreferences]=useState(false);
  const [backdropIndex,setBackdropIndex]=useState(0);
+ const [loadedBackdrops,setLoadedBackdrops]=useState<number[]>([]);
  const [details,setDetails]=useState<Film|null>(null);
  const [loaded,setLoaded]=useState(false);
- useEffect(()=>{if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;const timer=window.setInterval(()=>setBackdropIndex(i=>(i+1)%HOME_BACKDROPS.length),8500);return()=>window.clearInterval(timer);},[]);
+ // Only rotate through images that the browser actually loaded; a broken TMDB URL
+ // must never produce an empty frame in the hero.
+ useEffect(()=>{
+  if(loadedBackdrops.length && !loadedBackdrops.includes(backdropIndex)){
+   setBackdropIndex(loadedBackdrops[0]);
+  }
+ },[loadedBackdrops,backdropIndex]);
+ useEffect(()=>{
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches || loadedBackdrops.length<2)return;
+  const timer=window.setInterval(()=>setBackdropIndex(current=>{
+   const position=loadedBackdrops.indexOf(current);
+   return loadedBackdrops[(position+1)%loadedBackdrops.length];
+  }),5000);
+  return()=>window.clearInterval(timer);
+ },[loadedBackdrops]);
 
  const navigate=(next:View,nextMode:Mode=mode)=>{
   const url=new URL(window.location.href);
@@ -226,7 +242,7 @@ export default function Studio(){
  return <main className={"studio"+(view==="start"?" studio-home":"")}>
   <header className="studio-nav"><button className="studio-menu-toggle" aria-label="Open site menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(true)}><Menu size={23}/></button>
    <a href="/" className="studio-word">FILMOOD<span>.</span></a>
-   <nav aria-label="Personal cinema"><a href="/discover" style={{marginRight:18,color:"#c6b0f4",fontSize:12,textDecoration:"none"}}>Discovery Lab ↗</a><button className="studio-account-nav" onClick={()=>navigate("fingerprint")}><Fingerprint size={18}/> My Cinema</button></nav>
+   <nav aria-label="Personal cinema"><button className="studio-account-nav" onClick={()=>navigate("fingerprint")}><Fingerprint size={18}/> My Cinema</button></nav>
   </header>
   {menuOpen&&<div className="studio-menu-scrim" onClick={()=>setMenuOpen(false)}><aside className="studio-site-drawer" role="dialog" aria-modal="true" aria-label="FILMOOD navigation" onClick={e=>e.stopPropagation()}><div className="studio-drawer-head"><strong>FILMOOD<span>.</span></strong><button aria-label="Close menu" onClick={()=>setMenuOpen(false)}><X size={22}/></button></div><p className="studio-drawer-label">DISCOVER</p><button onClick={()=>{navigate("start");setMenuOpen(false);}}><Clapperboard size={19}/> Discover films</button><button onClick={()=>{enterLab();setMenuOpen(false);}}><FlaskConical size={19}/> Film Lab</button><button onClick={()=>{navigate("fusion");setMenuOpen(false);}}><FusionDnaIcon/> Film DNA Fusion</button><p className="studio-drawer-label">YOUR SPACE</p><button onClick={()=>{navigate("fingerprint");setMenuOpen(false);}}><Fingerprint size={19}/> My Cinema · Film Identity</button><button onClick={()=>{setProviderOpen(true);setMenuOpen(false);}}><Tv size={19}/> Streaming services</button><button disabled title="Accounts are not available yet"><UserRound size={19}/> Account <small>COMING SOON</small></button><button disabled title="Sign in is not available yet"><LogIn size={19}/> Sign in <small>COMING SOON</small></button><button disabled title="No account session exists yet"><LogOut size={19}/> Sign out <small>NOT SIGNED IN</small></button><p className="studio-drawer-label">INFORMATION</p><a href="/about"><Info size={19}/> About FILMOOD</a><a href="/privacy"><Shield size={19}/> Privacy policy</a><a href="/terms"><FileText size={19}/> Terms of service</a><div className="studio-drawer-bottom">FILMOOD. · Independent movie discovery prototype</div></aside></div>}
   {providerOpen&&<div className="studio-services-backdrop" onClick={()=>setProviderOpen(false)}><section className="studio-services-panel" role="dialog" aria-modal="true" aria-label="Streaming platforms" onClick={e=>e.stopPropagation()}>
@@ -237,16 +253,15 @@ export default function Studio(){
     <button className="studio-primary studio-services-done" onClick={()=>setProviderOpen(false)}>Save my selection <Check size={17}/></button>
    </section></div>}
   {view==="start"&&<section className="studio-hero">
-   <div className="studio-cinema-backdrop studio-cinema-carousel" aria-hidden="true">{HOME_BACKDROPS.map((frame,i)=><div key={frame.title} className={"studio-cinema-frame"+(backdropIndex===i?" is-active":"")} style={{backgroundImage:"url(https://image.tmdb.org/t/p/w1280/"+frame.image+")"}}/>)}</div>
+   <div className="studio-cinema-backdrop studio-cinema-carousel" aria-hidden="true">{HOME_BACKDROPS.map((frame,i)=><div key={frame.title} className={"studio-cinema-frame"+(backdropIndex===i&&loadedBackdrops.includes(i)?" is-active":"")}><img src={"https://image.tmdb.org/t/p/w1280/"+frame.image} alt="" loading="eager" decoding="async" onLoad={()=>setLoadedBackdrops(previous=>previous.includes(i)?previous:[...previous,i].sort((a,b)=>a-b))}/></div>)}</div>
    <p className="studio-eyebrow">FILMOOD ORIGINAL DISCOVERY EXPERIENCE</p>
    <h1>Some feelings deserve<br/><em>another film.</em></h1>
    <p className="studio-lead">A cinematic experience built around what moves you. Pick a direction. The discovery begins on the next screen.</p>
-   <p className="studio-feature-label">CHOOSE YOUR WAY IN </p>
+   <p className="studio-feature-label">FOUR WAYS TO DISCOVER</p>
    <div className="studio-mode-grid">
     <button className="studio-mode" onClick={()=>chooseMode("mood")}><Heart size={27}/><strong>MOOD.</strong><span>Start with a feeling. Discover where it takes you.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
     <button className="studio-mode" onClick={()=>chooseMode("filmood")}><Clapperboard size={27}/><strong>FILMOOD.</strong><span>Start with a film. Follow its emotional aftertaste.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
    </div>
-   <div className="studio-experiments-heading"><span>THE EXPERIMENTS</span></div>
    <div className="studio-experiments-grid">
     <button className="studio-experiment-card studio-experiment-lab" onClick={()=>enterLab()}><span className="studio-experiment-icon"><FlaskConical size={27}/></span><strong>The Film Lab.</strong><small>Rewrite the feeling. Eight cinematic ingredients, one recipe that is entirely yours.</small><span className="studio-experiment-action">ENTER THE LAB <ArrowRight size={17}/></span></button>
     <button className="studio-experiment-card studio-experiment-blend" onClick={()=>navigate("fusion")}><span className="studio-experiment-icon"><FusionDnaIcon/></span><strong>Film DNA Fusion.</strong><small>Two films. One DNA. Discover what happens when their cinematic worlds meet.</small><span className="studio-experiment-action">START FUSING <ArrowRight size={17}/></span></button>
