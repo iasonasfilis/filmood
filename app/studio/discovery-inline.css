@@ -349,3 +349,15 @@
   .studio .studio-inline-discover-button,
   .studio .studio-inline-film {transition:none;transform:none}
 }
+
+/* The Studio footer and root padding previously created a scrollbar even
+   when both discovery panels fitted inside the visible browser window. */
+.studio.studio-play-active {padding-bottom:0}
+.studio.studio-play-active .studio-footer {display:none}
+@media(min-width:1100px) and (min-height:680px) {
+  .studio.studio-play-active {
+    height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+}
