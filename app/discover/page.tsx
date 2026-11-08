@@ -16,7 +16,7 @@ const similarity=(a:Record<Axis,number>,b:Record<Axis,number>)=>1-AXES.reduce((s
 const empty=()=>Object.fromEntries(AXES.map(a=>[a,50])) as Record<Axis,number>;
 const hasIntent=(query:string)=>AXES.some(axis=>HINTS[axis].some(term=>query.toLowerCase().includes(term)));
 const queryDNA=(query:string)=>{const target=empty();const q=query.toLowerCase();for(const axis of AXES){if(HINTS[axis].some(t=>q.includes(t)))target[axis]=90;}if(/less dark|not dark|λιγοτερο σκοτειν/.test(q))target.dark=15;if(/slow|αργο/.test(q))target.pace=15;if(/less sad|not sad|χωρις θλιψ/.test(q))target.emotion=25;return target;};
-const filmImage=(film:Film)=>film.poster?`https://image.tmdb.org/t/p/w342/${film.poster}`:null;
+
 
 export default function Discover(){
  const [query,setQuery]=useState("");
@@ -72,10 +72,10 @@ export default function Discover(){
     <div className="discover-results-head"><div><p className="discover-eyebrow">CURATED DISCOVERY / PREVIEW</p><h2>Your lineup</h2></div><span>{matches.length} films</span></div>
     {!matches.length&&<div className="discover-empty">No films match these filters in the current 23-film catalog. Try a longer runtime or a different region.</div>}
     <div className="discover-grid">{matches.map(({film,score,matched,personal},i)=><article className="discover-card" key={film.id}>
-      <div className="discover-poster">{filmImage(film)?<img src={filmImage(film)!} alt={`Poster for ${film.title}`} loading="lazy"/>:<div className="discover-poster-placeholder">{film.title}</div>}<span className="discover-rank">{String(i+1).padStart(2,"0")}</span></div>
+      <div className="discover-poster"><div className="discover-poster-placeholder">{film.title}</div><span className="discover-rank">{String(i+1).padStart(2,"0")}</span></div>
       <div className="discover-card-copy"><p className="discover-meta">{film.year} · {film.length} MIN · {film.region}</p><h3>{film.title}</h3><p>{film.description}</p><p className="discover-why"><strong>Why this film:</strong> Closest DNA: {matched.map(a=>LABELS[a]).join(", ")}.</p><div className="discover-card-foot"><span>{Math.round(score*100)} <small>/ 100 similarity</small></span>{personal!==null&&<span className="discover-personal">Taste-aware</span>}</div><div className="discover-actions"><button onClick={()=>toggle("watched",film.id)}>{taste.watched.includes(film.id)?"Undo watched":"Watched"}</button><button onClick={()=>toggle("disliked",film.id)}>Not for me</button><button onClick={()=>setRating(film.id,5)}>Loved it ★</button></div></div>
      </article>)}</div>
-    <p className="discover-disclaimer">Scores are heuristic similarities, not probabilities of enjoyment. No real-time Greek streaming availability is claimed. Posters, where present, use existing prototype assets; review their licensing before launch.</p>
+    <p className="discover-disclaimer">Scores are heuristic similarities, not probabilities of enjoyment. No real-time Greek streaming availability is claimed. This preview deliberately avoids third-party poster dependencies.</p>
    </section>
   </div>
  </main>;
