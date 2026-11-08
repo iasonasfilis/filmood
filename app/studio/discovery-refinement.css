@@ -1,0 +1,472 @@
+/* MOOD + FILMOOD: the same cinematic workspace language as Film Lab and Fusion.
+   Keep discovery behavior intact; this layer only changes composition and presentation. */
+.studio .studio-discovery-screen {
+  width:100%;
+  max-width:none;
+  padding:10px clamp(22px,3vw,54px) 30px;
+}
+.studio .studio-discovery-screen .studio-feature-back {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin:0;
+  padding:4px 0 10px;
+  color:#cdbbd0;
+  font-size:12px;
+}
+.studio .studio-discovery-banner-compact {
+  min-height:0;
+  margin:0 0 13px;
+  padding:18px clamp(22px,2.6vw,34px);
+  border-radius:10px;
+  border:1px solid rgba(220,190,217,.28);
+  background:radial-gradient(ellipse at 88% 18%,rgba(152,109,156,.25),transparent 45%),
+    linear-gradient(112deg,#29212d,#17151d 75%);
+}
+.studio .studio-discovery-banner-compact>span {
+  font-size:10px;
+  letter-spacing:2px;
+  color:#e2bad7;
+}
+.studio .studio-discovery-banner-compact h1 {
+  margin:7px 0 7px;
+  font:400 clamp(30px,3.1vw,44px)/1.07 Georgia,serif;
+  letter-spacing:-.04em;
+}
+.studio .studio-discovery-banner-compact h1 em {
+  font-weight:400;
+  color:#e6bdd9;
+}
+.studio .studio-discovery-banner-compact .studio-play-intro {
+  margin:0;
+  color:#c9bdcc;
+  font-size:12px;
+  line-height:1.45;
+}
+.studio .studio-discovery-screen .studio-discovery-columns {
+  display:grid;
+  grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);
+  align-items:stretch;
+  gap:14px;
+}
+.studio .studio-discovery-screen .studio-discovery-console,
+.studio .studio-discovery-screen .studio-discovery-output {
+  grid-column:auto;
+  min-width:0;
+  min-height:0;
+  padding:19px clamp(17px,1.8vw,26px) 21px;
+  border:1px solid rgba(230,208,227,.18);
+  border-radius:10px;
+  background:linear-gradient(150deg,#211b25,#17151c 78%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+}
+.studio .studio-discovery-screen .studio-discovery-console {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:0;
+}
+.studio .studio-discovery-screen .studio-discovery-output {
+  display:flex;
+  flex-direction:column;
+  align-self:stretch;
+  gap:0;
+}
+.studio .studio-discovery-console>.studio-eyebrow,
+.studio .studio-discovery-output>.studio-eyebrow {
+  color:#dcb8d7;
+  font-size:10px;
+  letter-spacing:1.7px;
+}
+.studio .studio-discovery-console>h2,
+.studio .studio-discovery-output>h2 {
+  margin:7px 0 6px;
+  font:400 clamp(27px,2.4vw,35px)/1.09 Georgia,serif;
+  letter-spacing:-.035em;
+  color:#f6ecf4;
+}
+.studio .studio-discovery-console>.studio-discovery-helper,
+.studio .studio-discovery-output>.studio-discovery-output-intro {
+  margin:0 0 15px;
+  color:#b9adbd;
+  font-size:12px;
+  line-height:1.55;
+}
+.studio .studio-discovery-screen .studio-visual-moods {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-auto-rows:clamp(112px,15vh,140px);
+  gap:9px;
+}
+.studio .studio-discovery-screen .studio-visual-mood {
+  width:100%;
+  height:100%;
+  min-height:0;
+  padding:12px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.25);
+  background-size:cover;
+  background-position:center;
+  box-shadow:none;
+  text-align:left;
+}
+.studio .studio-discovery-screen .studio-visual-mood::before {
+  background:linear-gradient(180deg,rgba(4,4,8,.16),rgba(4,4,8,.1) 32%,rgba(4,4,8,.88));
+}
+.studio .studio-discovery-screen .studio-visual-mood strong {
+  font:400 clamp(18px,1.6vw,24px)/1.08 Georgia,serif;
+  letter-spacing:-.025em;
+  text-shadow:0 2px 12px rgba(0,0,0,.6);
+}
+.studio .studio-discovery-screen .studio-visual-mood-number,
+.studio .studio-discovery-screen .studio-mood-check {
+  color:#f0e5ef;
+  font-size:9px;
+  letter-spacing:.075em;
+}
+.studio .studio-discovery-screen .studio-visual-mood.chosen {
+  outline:2px solid #edc8e2;
+  outline-offset:-3px;
+  border-color:#e6bbd9;
+}
+.studio .studio-discovery-screen .studio-mood-mix {
+  margin:11px 0 0;
+  padding:10px 12px;
+  border:1px solid rgba(230,193,217,.24);
+  border-radius:7px;
+  background:rgba(232,190,221,.045);
+}
+.studio .studio-discovery-screen .studio-mood-mix>span {
+  font-size:10px;
+  color:#e0bdd5;
+}
+.studio .studio-discovery-screen .studio-mood-mix>div {
+  margin:8px 0 0;
+  gap:6px;
+}
+.studio .studio-discovery-screen .studio-mood-mix button {
+  padding:6px 9px;
+  border-radius:5px;
+  border-color:rgba(231,195,218,.3);
+  background:rgba(231,195,218,.08);
+  font-size:11px;
+}
+.studio .studio-discovery-screen .studio-chat-inline {
+  position:static;
+  min-height:0!important;
+  margin:13px 0 0!important;
+  padding:13px 15px!important;
+  border:1px solid rgba(230,205,226,.19);
+  border-radius:8px;
+  background:#19171f;
+  box-shadow:none;
+}
+.studio .studio-discovery-screen .studio-chat-inline .studio-chat-top {
+  gap:10px;
+}
+.studio .studio-discovery-screen .studio-chat-inline .studio-chat-top>svg {
+  color:#d8b5d6;
+}
+.studio .studio-discovery-screen .studio-chat-inline .studio-chat-top strong {
+  font-size:13px;
+  color:#eee1ec;
+}
+.studio .studio-discovery-screen .studio-chat-inline .studio-chat-top small {
+  font-size:11px;
+  color:#a99dad;
+}
+.studio .studio-discovery-screen .studio-chat-inline .studio-chat-compose {
+  margin-top:10px;
+  padding:4px;
+  border:1px solid rgba(235,214,229,.2);
+  border-radius:6px;
+  background:#100f16;
+}
+.studio .studio-discovery-screen .studio-chat-inline .studio-chat-compose input {
+  padding:9px;
+  font-size:12px;
+}
+.studio .studio-discovery-screen .studio-chat-inline .studio-chat-compose button {
+  border-radius:4px;
+  padding:8px 11px;
+}
+.studio .studio-discovery-filmood .studio-filmood-simple {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.studio .studio-discovery-filmood .studio-film-picker-hero {
+  min-height:178px;
+}
+.studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-input-wrap {
+  min-height:178px;
+  padding:44px 17px 16px;
+  gap:14px;
+  border:1px solid rgba(225,189,220,.3);
+  border-radius:9px;
+  background:radial-gradient(ellipse at 90% 15%,rgba(147,102,158,.23),transparent 60%),
+    linear-gradient(115deg,#2b2331,#19161f);
+}
+.studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-label {
+  top:31px;
+  left:108px;
+  font-size:10px;
+  letter-spacing:1.2px;
+}
+.studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-art {
+  width:75px;
+  height:107px;
+  border-radius:6px;
+}
+.studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-input-wrap input {
+  height:52px;
+  min-width:0;
+  font:400 clamp(21px,2vw,29px)/1.2 Georgia,serif;
+}
+.studio .studio-discovery-filmood .studio-filmood-picker-help {
+  margin:0;
+  color:#b6a9b9;
+  font-size:11px;
+  line-height:1.45;
+}
+.studio .studio-discovery-steps {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-top:15px;
+}
+.studio .studio-discovery-steps>span {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:12px 10px;
+  border:1px solid rgba(232,207,229,.17);
+  border-radius:7px;
+  background:rgba(255,255,255,.025);
+  color:#bfb2c3;
+  font-size:11px;
+  line-height:1.3;
+}
+.studio .studio-discovery-steps b {
+  font:400 17px Georgia,serif;
+  color:#d8b7d5;
+}
+.studio .studio-discovery-output .studio-discovery-preview-art {
+  position:relative;
+  isolation:isolate;
+  min-height:clamp(185px,24vh,235px);
+  overflow:hidden;
+  display:flex;
+  align-items:flex-end;
+  margin:3px 0 14px;
+  border:1px solid rgba(233,207,227,.24);
+  border-radius:8px;
+  background:radial-gradient(ellipse at 85% 15%,#795c7d,#322638 50%,#17151e 95%);
+  background-position:center;
+  background-size:cover;
+}
+.studio .studio-discovery-output .studio-discovery-preview-art::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  background:linear-gradient(0deg,rgba(9,8,13,.93),rgba(11,9,16,.42) 54%,rgba(10,9,15,.18));
+}
+.studio .studio-discovery-preview-mood.mood-0 {background-image:url("https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=1100&q=80")}
+.studio .studio-discovery-preview-mood.mood-1 {background-image:url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1100&q=80")}
+.studio .studio-discovery-preview-mood.mood-2 {background-image:url("https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=1100&q=80")}
+.studio .studio-discovery-preview-mood.mood-3 {background-image:url("https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1100&q=80")}
+.studio .studio-discovery-preview-mood.mood-4 {background-image:url("https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=1100&q=80")}
+.studio .studio-discovery-preview-mood.mood-5 {background-image:url("https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1100&q=80")}
+.studio .studio-discovery-preview-film {
+  background:radial-gradient(ellipse at 78% 15%,#674e70,#302537 58%,#15131b);
+}
+.studio .studio-discovery-preview-poster {
+  position:absolute;
+  z-index:-1;
+  right:22px;
+  top:10px;
+  width:114px;
+  aspect-ratio:2/3;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.3);
+  border-radius:6px;
+  transform:rotate(5deg);
+  box-shadow:0 10px 40px rgba(0,0,0,.55);
+  background:#4d3d55;
+}
+.studio .studio-discovery-preview-poster img {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.studio .studio-discovery-preview-copy {
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-width:80%;
+  padding:20px;
+}
+.studio .studio-discovery-preview-copy>span {
+  color:#e9d2e7;
+  font-size:10px;
+  letter-spacing:1.6px;
+  font-weight:600;
+}
+.studio .studio-discovery-preview-copy strong {
+  color:#fff6fc;
+  font:400 clamp(24px,2.2vw,34px)/1.08 Georgia,serif;
+  letter-spacing:-.035em;
+  text-shadow:0 3px 18px rgba(0,0,0,.6);
+}
+.studio .studio-discovery-preview-copy small {
+  color:#e2d1df;
+  font-size:11px;
+  line-height:1.4;
+}
+.studio .studio-discovery-preview-facts {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:12px 0;
+  border-top:1px solid rgba(238,217,232,.15);
+  border-bottom:1px solid rgba(238,217,232,.15);
+}
+.studio .studio-discovery-preview-facts>div {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.studio .studio-discovery-preview-facts>div+div {
+  padding-left:12px;
+  border-left:1px solid rgba(238,217,232,.15);
+}
+.studio .studio-discovery-preview-facts span {
+  color:#a99aaf;
+  font-size:9px;
+  letter-spacing:.1em;
+  line-height:1.3;
+}
+.studio .studio-discovery-preview-facts strong {
+  color:#e8c7e2;
+  font:400 27px Georgia,serif;
+}
+.studio .studio-discovery-screen .studio-discover-meta {
+  padding:13px 0 11px;
+  margin-top:auto;
+}
+.studio .studio-discovery-screen .studio-discover-meta .studio-optional-toggle {
+  width:100%;
+  margin:0;
+  padding:7px 0;
+  border:0;
+  color:#d8bad3;
+  font-size:12px;
+  text-align:left;
+}
+.studio .studio-discovery-screen .studio-discover-meta .studio-optional-toggle:hover {
+  color:#fff3fd;
+}
+.studio .studio-discovery-screen .studio-discover-meta .studio-occasion {
+  margin:9px 0 0;
+}
+.studio .studio-discovery-screen .studio-discover-cta {
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:space-between;
+  width:100%;
+  height:56px;
+  min-height:56px;
+  padding:0 17px;
+  border:1px solid rgba(250,215,239,.5);
+  border-radius:7px;
+  background:linear-gradient(112deg,#e3c0db,#caa4d1);
+  color:#261a2a;
+  font:600 15px/1.2 Arial,sans-serif;
+  letter-spacing:0;
+  text-align:left;
+  box-shadow:none;
+  transition:background .18s,transform .18s;
+}
+.studio .studio-discovery-screen .studio-discover-cta:hover:not(:disabled) {
+  background:linear-gradient(112deg,#f0d4e9,#d7b1dc);
+  transform:translateY(-1px);
+  box-shadow:none;
+}
+.studio .studio-discovery-screen .studio-discover-cta:disabled {
+  opacity:.42;
+  transform:none;
+  box-shadow:none;
+}
+.studio .studio-discovery-screen .studio-discover-cta svg {
+  align-self:center;
+  width:22px;
+  height:22px;
+}
+.studio .studio-discovery-screen .studio-discovery-output-note {
+  margin:9px 0 0;
+  color:#8f8595;
+  font-size:10px;
+  line-height:1.4;
+  text-align:center;
+}
+@media(max-width:1020px) {
+  .studio .studio-discovery-screen .studio-discovery-columns {
+    grid-template-columns:1fr;
+  }
+  .studio .studio-discovery-screen .studio-discovery-console,
+  .studio .studio-discovery-screen .studio-discovery-output {
+    grid-column:1;
+    padding:20px;
+  }
+  .studio .studio-discovery-screen .studio-visual-moods {
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-auto-rows:135px;
+  }
+  .studio .studio-discovery-output .studio-discovery-preview-art {min-height:180px}
+}
+@media(max-width:640px) {
+  .studio .studio-discovery-screen {padding:14px 16px 25px}
+  .studio .studio-discovery-banner-compact {padding:18px 19px}
+  .studio .studio-discovery-banner-compact h1 {font-size:30px}
+  .studio .studio-discovery-screen .studio-discovery-console,
+  .studio .studio-discovery-screen .studio-discovery-output {padding:17px}
+  .studio .studio-discovery-screen .studio-visual-moods {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-auto-rows:145px;
+  }
+  .studio .studio-discovery-screen .studio-visual-mood strong {font-size:22px}
+  .studio .studio-discovery-steps {grid-template-columns:1fr;gap:6px}
+  .studio .studio-discovery-steps>span {padding:9px 11px}
+  .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-input-wrap {
+    min-height:158px;
+    padding:38px 12px 12px;
+    gap:10px;
+  }
+  .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-label {
+    top:25px;
+    left:90px;
+  }
+  .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-art {
+    width:61px;
+    height:91px;
+  }
+  .studio .studio-discovery-filmood .studio-film-picker-hero .studio-film-picker-input-wrap input {
+    font-size:20px;
+  }
+  .studio .studio-discovery-preview-copy {padding:16px}
+  .studio .studio-discovery-preview-copy strong {font-size:27px}
+  .studio .studio-discovery-preview-poster {width:90px;right:15px;top:14px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .studio .studio-discovery-screen .studio-visual-mood,
+  .studio .studio-discovery-screen .studio-discover-cta {transition:none;transform:none}
+}
