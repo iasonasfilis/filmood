@@ -7,6 +7,9 @@ import "./filmood-discovery.css";
 import "./discovery-layout.css";
 import "./extra-features.css";
 import "./compact-experiences.css";
+import "./studio-polish.css";
+import "./discovery-refinement.css";
+import "./discovery-inline.css";
 import { FILMS, type Film } from "./film-data";
 
 type Axis = "dark" | "pace" | "emotion" | "mind" | "visual" | "indie" | "humor" | "action";
@@ -149,11 +152,40 @@ export default function Studio(){
  const [liked,setLiked]=useState<number[]>([]);
  const [providerOpen,setProviderOpen]=useState(false);
  const [menuOpen,setMenuOpen]=useState(false);
- const [showFilmPreferences,setShowFilmPreferences]=useState(false);
+ const [showDiscoveryResults,setShowDiscoveryResults]=useState(false);
  const [backdropIndex,setBackdropIndex]=useState(0);
+ const [loadedBackdrops,setLoadedBackdrops]=useState<number[]>([]);
+ const backdropImageRefs=useRef<(HTMLImageElement|null)[]>([]);
+ const markBackdropReady=(index:number)=>setLoadedBackdrops(previous=>
+  previous.includes(index)?previous:[...previous,index].sort((a,b)=>a-b)
+ );
+ // Cached images may finish loading before React attaches onLoad during hydration.
+ // Check the DOM images once after mounting, as well as handling later load events.
+ useEffect(()=>{
+  const ready=backdropImageRefs.current.flatMap((image,index)=>
+   image?.complete&&image.naturalWidth>0?[index]:[]
+  );
+  if(ready.length)setLoadedBackdrops(previous=>
+   Array.from(new Set<number>([...previous,...ready])).sort((a,b)=>a-b)
+  );
+ },[]);
  const [details,setDetails]=useState<Film|null>(null);
  const [loaded,setLoaded]=useState(false);
- useEffect(()=>{if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;const timer=window.setInterval(()=>setBackdropIndex(i=>(i+1)%HOME_BACKDROPS.length),8500);return()=>window.clearInterval(timer);},[]);
+ // Only rotate through images that the browser actually loaded; a broken TMDB URL
+ // must never produce an empty frame in the hero.
+ useEffect(()=>{
+  if(loadedBackdrops.length && !loadedBackdrops.includes(backdropIndex)){
+   setBackdropIndex(loadedBackdrops[0]);
+  }
+ },[loadedBackdrops,backdropIndex]);
+ useEffect(()=>{
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches || loadedBackdrops.length<2)return;
+  const timer=window.setInterval(()=>setBackdropIndex(current=>{
+   const position=loadedBackdrops.indexOf(current);
+   return loadedBackdrops[(position+1)%loadedBackdrops.length];
+  }),5000);
+  return()=>window.clearInterval(timer);
+ },[loadedBackdrops]);
 
  const navigate=(next:View,nextMode:Mode=mode)=>{
   const url=new URL(window.location.href);
@@ -167,8 +199,10 @@ export default function Studio(){
    else url.searchParams.delete("moods");
   }
   url.searchParams.delete("detail");
+  url.searchParams.delete("discovered");
   window.history.pushState({filmood:true},"",url);
   setDetails(null);
+  if(next!=="play")setShowDiscoveryResults(false);
   setMode(nextMode);
   setView(next);
  };
@@ -179,6 +213,7 @@ export default function Studio(){
    const next:View=raw==="play"||raw==="results"||raw==="lab"||raw==="fusion"||raw==="fingerprint"?raw:"start";
    const nextMode:Mode=params.get("mode")==="filmood"?"filmood":"mood";
    setMode(nextMode);setView(next);
+   setShowDiscoveryResults(next==="play"&&params.get("discovered")==="1");
    const film=params.get("film");
    if(film&&FILMS.some(f=>f.title===film)){setReference(film);setFilmSelected(true);}
    const moodsParam=params.get("moods");
@@ -211,19 +246,61 @@ export default function Studio(){
   .map(f=>({film:f,score:distance(f,target)+(liked.includes(f.id)?-16:0)+((depth-50)/50)*(f.dna.indie-50)*-.35}))
   .sort((a,b)=>matchPercentage(b.film,target)-matchPercentage(a.film,target)||a.score-b.score||a.film.id-b.film.id).slice(0,6).map(x=>x.film),
   [view,labBase,mode,reference,region,runtime,depth,passed,watched,liked,target]);
- const launch=()=>{if(mode==="mood"&&moods.length===0&&!chatTarget)return;if(mode==="filmood"&&!filmSelected)return;setMix({...target});navigate("results");};
- // Enter discovers from the page; inputs, dialogs and other controls keep their native Enter behavior.
- useEffect(()=>{if(view!=="play")return;const onEnter=(event:KeyboardEvent)=>{if(event.key!=="Enter"||event.repeat||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||menuOpen||providerOpen||details)return;const node=event.target;if(node instanceof Element&&node.closest("input,textarea,select,button,a,[role=dialog],[contenteditable=true]"))return;event.preventDefault();launch();};window.addEventListener("keydown",onEnter);return()=>window.removeEventListener("keydown",onEnter);},[view,launch,menuOpen,providerOpen,details]);
- const chooseMode=(next:Mode)=>{if(next==="mood")setMoods([]);if(next==="filmood")setFilmSelected(false);setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);navigate("play",next);};
+ const launch=()=>{
+  if(mode==="mood"&&moods.length===0&&!chatTarget)return;
+  if(mode==="filmood"&&!filmSelected)return;
+  setMix({...target});
+  setShowDiscoveryResults(true);
+  const url=new URL(window.location.href);
+  url.searchParams.set("discovered","1");
+  if(mode==="filmood"){url.searchParams.set("film",reference);url.searchParams.delete("moods");}
+  else {url.searchParams.set("moods",moods.join("|"));url.searchParams.delete("film");}
+  window.history.replaceState(window.history.state,"",url);
+ };
+ // Enter reveals recommendations in place. Search inputs and dialogs keep native behavior.
+ useEffect(()=>{
+  if(view!=="play"||showDiscoveryResults)return;
+  const onEnter=(event:KeyboardEvent)=>{
+   if(event.key!=="Enter"||event.repeat||event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||menuOpen||providerOpen||details)return;
+   const node=event.target;
+   if(node instanceof Element){
+    if(node.closest("input,textarea,select,a,[role=dialog],[contenteditable=true]"))return;
+    const button=node.closest("button");
+    if(button&&!button.matches(".studio-visual-mood[aria-pressed='true']"))return;
+   }
+   event.preventDefault();
+   launch();
+  };
+  window.addEventListener("keydown",onEnter);
+  return()=>window.removeEventListener("keydown",onEnter);
+ },[view,showDiscoveryResults,launch,menuOpen,providerOpen,details]);
+ const chooseMode=(next:Mode)=>{if(next==="mood")setMoods([]);if(next==="filmood")setFilmSelected(false);setMode(next);setChatHistory([]);setChatInput("");setChatTarget(null);setShowDiscoveryResults(false);navigate("play",next);};
  const chooseMood=(label:string)=>{setMoods(prev=>prev.includes(label)?(prev.filter(x=>x!==label)):[...prev,label]);setChatTarget(null);};
- const sendChat=()=>{const input=chatInput.trim();if(!input||(mode==="filmood"&&!filmSelected))return;setFilmateError("");const base=chatTarget||(mode==="mood"?moodDNA:referenceDNA);const analysis=interpretFilmate(input,base,FILMS.map(f=>f.title),chatHistory.length);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:analysis.reply}]);setChatInput("");setChatTarget(analysis.dna);setMix(analysis.dna);navigate("results");};
+ const sendChat=()=>{const input=chatInput.trim();if(!input||(mode==="filmood"&&!filmSelected))return;setFilmateError("");const base=chatTarget||(mode==="mood"?moodDNA:referenceDNA);const analysis=interpretFilmate(input,base,FILMS.map(f=>f.title),chatHistory.length);setChatHistory(h=>[...h,{role:"user",text:input},{role:"guide",text:analysis.reply}]);setChatInput("");setChatTarget(analysis.dna);setMix(analysis.dna);setShowDiscoveryResults(true);const url=new URL(window.location.href);url.searchParams.set("discovered","1");window.history.replaceState(window.history.state,"",url);};
  const enterLab=(film?:Film)=>{if(film){setReference(film.title);setLabBase(film.title);setMix({...film.dna});setMode("filmood");}else{setLabBase("Custom mix");setMix(view==="start"?{...neutralDNA}:{...target});}navigate("lab",film?"filmood":mode);};
- const chooseSearchFilm=(film:Film)=>{changeReference(film.title);setFilmSelected(true);setChatTarget(null);setRecentFilmSearches(previous=>{const next=[film.title,...previous.filter(x=>x!==film.title)].slice(0,8);try{localStorage.setItem("filmood-recent-film-searches",JSON.stringify(next));}catch{}return next;});};
+ const chooseSearchFilm=(film:Film)=>{
+  // Selecting a search result is the discovery action: one click or one Enter.
+  // React batches these updates, so results use the newly selected film's DNA.
+  changeReference(film.title);
+  setFilmSelected(true);
+  setChatTarget(null);
+  setShowDiscoveryResults(true);
+  const url=new URL(window.location.href);
+  url.searchParams.set("discovered","1");
+  url.searchParams.set("film",film.title);
+  url.searchParams.delete("moods");
+  window.history.replaceState(window.history.state,"",url);
+  setRecentFilmSearches(previous=>{
+   const next=[film.title,...previous.filter(x=>x!==film.title)].slice(0,8);
+   try{localStorage.setItem("filmood-recent-film-searches",JSON.stringify(next));}catch{}
+   return next;
+  });
+ };
  const changeReference=(value:string)=>{setReference(value);setMix({...(REFERENCES.find(r=>r.name===value)?.dna||FILMS.find(f=>f.title===value)?.dna||REFERENCES[0].dna)});};
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
  const reset=()=>{setMix({...(labBase==="Custom mix"?neutralDNA:(REFERENCES.find(r=>r.name===labBase)?.dna||FILMS.find(f=>f.title===labBase)?.dna||neutralDNA))});setRegion("Anywhere");setRuntime("Any length");setDepth(52);};
  const sharedReason=(f:Film)=>{const closer=AXES.map(a=>({key:a.key,name:readable(a.key,f),delta:Math.abs(f.dna[a.key]-target[a.key])})).sort((a,b)=>a.delta-b.delta).slice(0,2).map(a=>a.name).join(" and ");const differences=AXES.map(a=>({name:a.name.toLowerCase(),delta:f.dna[a.key]-target[a.key]})).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));const contrast=differences[0];return "The vibe match: "+closer+". Compared with your mix, "+f.title+" leans "+(contrast.delta>0?"more ":"less ")+contrast.name+". "+f.description;};
- return <main className={"studio"+(view==="start"?" studio-home":"")}>
+ return <main className={"studio"+(view==="start"?" studio-home":"")+(view==="play"?" studio-play-active":"")}>
   <header className="studio-nav"><button className="studio-menu-toggle" aria-label="Open site menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(true)}><Menu size={23}/></button>
    <a href="/" className="studio-word">FILMOOD<span>.</span></a>
    <nav aria-label="Personal cinema"><button className="studio-account-nav" onClick={()=>navigate("fingerprint")}><Fingerprint size={18}/> My Cinema</button></nav>
@@ -237,16 +314,15 @@ export default function Studio(){
     <button className="studio-primary studio-services-done" onClick={()=>setProviderOpen(false)}>Save my selection <Check size={17}/></button>
    </section></div>}
   {view==="start"&&<section className="studio-hero">
-   <div className="studio-cinema-backdrop studio-cinema-carousel" aria-hidden="true">{HOME_BACKDROPS.map((frame,i)=><div key={frame.title} className={"studio-cinema-frame"+(backdropIndex===i?" is-active":"")} style={{backgroundImage:"url(https://image.tmdb.org/t/p/w1280/"+frame.image+")"}}/>)}</div>
+   <div className="studio-cinema-backdrop studio-cinema-carousel" aria-hidden="true">{HOME_BACKDROPS.map((frame,i)=><div key={frame.title} className={"studio-cinema-frame"+(backdropIndex===i&&loadedBackdrops.includes(i)?" is-active":"")}><img ref={node=>{backdropImageRefs.current[i]=node;}} src={"https://image.tmdb.org/t/p/w1280/"+frame.image} alt="" loading="eager" decoding="async" onLoad={()=>markBackdropReady(i)}/></div>)}</div>
    <p className="studio-eyebrow">FILMOOD ORIGINAL DISCOVERY EXPERIENCE</p>
    <h1>Some feelings deserve<br/><em>another film.</em></h1>
    <p className="studio-lead">A cinematic experience built around what moves you. Pick a direction. The discovery begins on the next screen.</p>
-   <p className="studio-feature-label">CHOOSE YOUR WAY IN </p>
+   <p className="studio-feature-label">FOUR WAYS TO DISCOVER</p>
    <div className="studio-mode-grid">
     <button className="studio-mode" onClick={()=>chooseMode("mood")}><Heart size={27}/><strong>MOOD.</strong><span>Start with a feeling. Discover where it takes you.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
     <button className="studio-mode" onClick={()=>chooseMode("filmood")}><Clapperboard size={27}/><strong>FILMOOD.</strong><span>Start with a film. Follow its emotional aftertaste.</span><ArrowRight className="studio-mode-arrow" size={22}/></button>
    </div>
-   <div className="studio-experiments-heading"><span>THE EXPERIMENTS</span></div>
    <div className="studio-experiments-grid">
     <button className="studio-experiment-card studio-experiment-lab" onClick={()=>enterLab()}><span className="studio-experiment-icon"><FlaskConical size={27}/></span><strong>The Film Lab.</strong><small>Rewrite the feeling. Eight cinematic ingredients, one recipe that is entirely yours.</small><span className="studio-experiment-action">ENTER THE LAB <ArrowRight size={17}/></span></button>
     <button className="studio-experiment-card studio-experiment-blend" onClick={()=>navigate("fusion")}><span className="studio-experiment-icon"><FusionDnaIcon/></span><strong>Film DNA Fusion.</strong><small>Two films. One DNA. Discover what happens when their cinematic worlds meet.</small><span className="studio-experiment-action">START FUSING <ArrowRight size={17}/></span></button>
@@ -254,32 +330,56 @@ export default function Studio(){
   </section>}
   {view==="play"&&<section className={"studio-play studio-play-refined studio-experiment studio-discovery-screen studio-discovery-"+mode}>
     <button className="studio-back-link studio-feature-back" onClick={()=>navigate("start")}><ArrowLeft size={16}/> Back to home</button>
-    <div className="studio-feature-banner studio-discovery-banner">
-     <span>{mode==="mood"?"MOOD.":"FILMOOD."} / FIND YOUR NEXT FILM</span>
-     <h1>{mode==="mood"?"What does tonight feel like?":"Start with a film you love."}</h1>
-     <p className="studio-play-intro">{mode==="mood"?"Choose one or more moods, or describe the feeling you want.":"Choose your starting film. We'll find its cinematic relatives."}</p>
+    <div className="studio-feature-banner studio-discovery-banner studio-discovery-banner-compact">
+     <span>{mode==="mood"?"MOOD. / FEELING FIRST":"FILMOOD. / FILM FIRST"}</span>
+     <h1>{mode==="mood"?<>Start with a feeling. <em>Find your film.</em></>:<>One film. <em>A whole new world.</em></>}</h1>
+     <p className="studio-play-intro">{mode==="mood"?"Choose the emotions you want tonight. We'll turn them into your next cinematic discovery.":"Choose a film that stayed with you. Discover stories that share its cinematic DNA."}</p>
     </div>
-    <div className="studio-discovery-columns">
-     <div className="studio-discovery-primary studio-discovery-console">
-      {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)} onKeyDown={e=>{if(e.key==="Enter"&&moods.length>0){e.preventDefault();launch();}}}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"ADD TO YOUR MIX"} <ArrowRight size={14}/></span></button>)}</div>
+    <div className="studio-discovery-columns studio-feature-layout">
+     <div className="studio-discovery-primary studio-discovery-console studio-feature-console">
+      <span className="studio-eyebrow">{mode==="mood"?"01 / CHOOSE YOUR FEELINGS":"01 / CHOOSE YOUR FILM"}</span>
+      <h2>{mode==="mood"?"Set the tone.":"The starting frame."}</h2>
+      <p className="studio-discovery-helper">{mode==="mood"?"Select as many moods as you like. Every combination tells a different story.":"Search the collection and pick the film you want to build on."}</p>
+      {mode==="mood"?<div className="studio-visual-moods">{MOOD_PRESETS.map((m,i)=><button key={m.label} type="button" aria-pressed={moods.includes(m.label)} className={"studio-visual-mood mood-"+i+(moods.includes(m.label)?" chosen":"")} onClick={()=>chooseMood(m.label)}><span className="studio-visual-mood-number">0{i+1}</span><strong>{m.label}</strong><span className="studio-mood-check">{moods.includes(m.label)?"✓ IN YOUR MIX":"+ ADD FEELING"} <ArrowRight size={14}/></span></button>)}</div>
       :<div className="studio-filmood-discovery studio-filmood-simple">
-        <FilmSearchPicker variant="hero" label="YOUR STARTING FILM" value={filmSelected?reference:""} placeholder="Find a film…" recent={recentFilmSearches} onSelect={chooseSearchFilm} onClear={()=>{setFilmSelected(false);setChatTarget(null);}}/>
-        <p className="studio-filmood-picker-help">{filmSelected?"Your film is selected. Search again to change it.":"Start typing a film title. Results appear as you type."}</p>
+        <FilmSearchPicker variant="hero" label="YOUR STARTING FILM" value={filmSelected?reference:""} placeholder="Find a film…" recent={recentFilmSearches} onSelect={chooseSearchFilm} onClear={()=>{setFilmSelected(false);setChatTarget(null);setShowDiscoveryResults(false);}}/>
+        <p className="studio-filmood-picker-help">{filmSelected?"Six recommendations are ready. Search again to change the film.":"Choose a title with one click or Enter to see six films instantly."}</p>
        </div>}
-      {mode==="mood"&&moods.length>0&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button key={m} onClick={()=>chooseMood(m)} title="Remove mood">{m} ×</button>)}</div></div>}
-      <aside className="studio-chat-panel studio-chat-panel-clean studio-chat-inline"><div className="studio-chat-top"><Sparkles size={19}/><div><strong>Describe your ideal film</strong><small>{mode==="filmood"&&!filmSelected?"Choose a starting film first":"Optional · Refine your recommendations with words"}</small></div></div>
+      {mode==="mood"&&moods.length>0&&<div className="studio-mood-mix"><span>YOUR MOOD MIX · {moods.length} {moods.length===1?"FEELING":"FEELINGS"}</span><div>{moods.map(m=><button type="button" key={m} onClick={()=>chooseMood(m)} title={"Remove "+m}>{m} ×</button>)}</div></div>}
+      {mode==="filmood"&&<div className="studio-discovery-steps" aria-label="How FILMOOD works"><span><b>01</b> Pick a film</span><span><b>02</b> Discover six instantly</span></div>}
+      <aside className="studio-chat-panel studio-chat-panel-clean studio-chat-inline">
+       <div className="studio-chat-top"><Sparkles size={19}/><div><strong>Add your own twist.</strong><small>{mode==="filmood"&&!filmSelected?"Choose a film to unlock this":"Optional · Describe the atmosphere you want"}</small></div></div>
        {chatHistory.length>0&&<div className="studio-chat-history">{chatHistory.map((m,i)=><p key={i} className={"studio-chat-"+m.role}>{m.text}</p>)}</div>}
        {filmateError&&<p className="studio-filmmate-error" role="alert">{filmateError}</p>}
-       <form onSubmit={e=>{e.preventDefault();sendChat();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} disabled={mode==="filmood"&&!filmSelected} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Beautiful, melancholic, a little mysterious…":filmSelected?"Like this film, but darker and stranger…":"Select a film to unlock refinement"} /><button type="submit" disabled={!chatInput.trim()||(mode==="filmood"&&!filmSelected)} aria-label="Refine recommendations"><ArrowRight size={20}/></button></form>
+       <form onSubmit={e=>{e.preventDefault();if(chatInput.trim())sendChat();else launch();}} className="studio-chat-compose"><input aria-label="Describe your ideal film" value={chatInput} disabled={mode==="filmood"&&!filmSelected} onChange={e=>setChatInput(e.target.value)} placeholder={mode==="mood"?"Beautiful, melancholic, a little mysterious…":filmSelected?"Like this film, but darker and stranger…":"Select a film to unlock refinement"} /><button type="submit" disabled={!chatInput.trim()||(mode==="filmood"&&!filmSelected)} aria-label="Refine recommendations"><ArrowRight size={20}/></button></form>
       </aside>
      </div>
-     <aside className="studio-discover-panel studio-discovery-output">
-      <button type="button" className="studio-primary studio-discover-cta" disabled={mode==="mood"?moods.length===0&&!chatTarget:!filmSelected} onClick={launch}><span>Discover films</span><ArrowRight size={32}/></button>
-      <div className="studio-discover-meta">
-       <p>{mode==="mood"?"Your mood mix becomes six film recommendations.":"Six recommendations inspired by your starting film."}</p>
-       <button type="button" className="studio-optional-toggle" aria-expanded={showFilmPreferences} onClick={()=>setShowFilmPreferences(v=>!v)}>{showFilmPreferences?"− Hide viewing occasion":"+ Viewing occasion (optional)"}</button>
-       {showFilmPreferences&&<label className="studio-occasion">TONIGHT'S SITUATION<select value={situation} onChange={e=>setSituation(e.target.value)}>{["Any occasion","Watching alone","Date night","With friends","Sunday afternoon","3 AM existential crisis"].map(s=><option key={s}>{s}</option>)}</select></label>}
-      </div>
+     <aside className={"studio-discover-panel studio-discovery-output studio-feature-output studio-inline-panel"+(showDiscoveryResults?" has-films":" is-waiting")}>
+      {!showDiscoveryResults?
+       <button type="button" className="studio-inline-discover-button" disabled={mode==="mood"?moods.length===0&&!chatTarget:!filmSelected} onClick={launch}>
+        <span>DISCOVER</span><ArrowRight size={27}/>
+       </button>
+      :<section className="studio-inline-results" aria-label="Your film recommendations" aria-live="polite">
+       <div className="studio-inline-results-heading">
+        <div><span className="studio-eyebrow">02 / YOUR DISCOVERIES</span><h2>{mode==="mood"?"Films for your mood.":"Beyond your starting film."}</h2></div>
+        <button type="button" className="studio-inline-edit" onClick={()=>{setShowDiscoveryResults(false);const url=new URL(window.location.href);url.searchParams.delete("discovered");window.history.replaceState(window.history.state,"",url);}}><RotateCcw size={14}/> Reset</button>
+       </div>
+       {results.length===0?<div className="studio-inline-empty">No films match your current filters. Try adjusting your selection.</div>
+       :<div className="studio-inline-film-grid">
+        {results.map((film,i)=><article className="studio-inline-film" key={film.id}>
+         <button type="button" className="studio-inline-film-open" onClick={()=>openDetails(film)} aria-label={"View "+film.title+" details"}>
+          <span className="studio-inline-film-poster">{film.poster?<img src={"https://image.tmdb.org/t/p/w185/"+film.poster} alt="" loading="eager" onError={e=>{e.currentTarget.style.display="none";}}/>:<span>{film.title.slice(0,1)}</span>}</span>
+          <span className="studio-inline-film-copy">
+           <small className="studio-inline-film-rank">{String(i+1).padStart(2,"0")} / FILMOOD PICK</small>
+           <strong>{film.title}</strong>
+           <small className="studio-inline-film-meta">{film.year} · {film.length} min</small>
+           <span className="studio-inline-film-match">{matchPercentage(film,target)}% <small>DNA MATCH</small></span>
+          </span>
+         </button>
+        </article>)}
+       </div>}
+       <p className="studio-inline-results-note">Illustrative DNA similarities · {FILMS.length}-film prototype · Tap a film for details.</p>
+      </section>}
      </aside>
     </div>
   </section>}

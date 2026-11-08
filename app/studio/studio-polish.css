@@ -1,0 +1,316 @@
+/* FILMOOD / four-experience editorial polish.
+   Last in the Studio cascade so the established layouts remain functional. */
+.studio {
+  --studio-edge:rgba(231,210,227,.19);
+  --studio-muted:#b9adbd;
+  --studio-ink:#f6eff5;
+  font-family:"DM Sans",Arial,sans-serif;
+  background:#100e14;
+  color:var(--studio-ink);
+}
+.studio button,.studio input,.studio select {font-family:inherit}
+.studio button {cursor:pointer}
+.studio button:disabled {cursor:not-allowed}
+.studio :is(button,a,input,select,summary):focus-visible {
+  outline:2px solid #e8c1e5;
+  outline-offset:3px;
+}
+.studio .studio-nav {
+  min-height:62px;
+  padding:10px clamp(20px,3.2vw,54px);
+  border-bottom:1px solid rgba(255,255,255,.11);
+  background:rgba(11,10,15,.85);
+  backdrop-filter:blur(18px);
+}
+.studio .studio-word {font-size:18px;letter-spacing:.22em;font-weight:750}
+.studio .studio-nav nav .studio-account-nav {
+  border:1px solid rgba(255,255,255,.19);
+  background:rgba(255,255,255,.035);
+  border-radius:7px;
+  padding:9px 12px;
+  letter-spacing:.025em;
+}
+
+/* Keep the carousel cinematic, with a visible fallback if artwork fails. */
+.studio-home .studio-cinema-carousel {
+  background:radial-gradient(ellipse at 72% 20%,#514050 0%,#1b1722 44%,#0d0c12 85%)!important;
+}
+.studio-home .studio-cinema-carousel .studio-cinema-frame {
+  transition:opacity 1200ms ease-in-out,transform 6800ms ease-out;
+  background:none;
+}
+.studio-home .studio-cinema-carousel .studio-cinema-frame img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center 39%;
+  display:block;
+}
+
+/* The four ways in are a single visual family, not two unrelated sets. */
+.studio-home .studio-hero {
+  padding:clamp(20px,3.3vh,36px) clamp(24px,5vw,90px);
+}
+.studio-home .studio-hero>.studio-eyebrow {
+  font-size:10px;
+  letter-spacing:.24em;
+  color:#e4c3d7;
+}
+.studio-home .studio-hero h1 {
+  font:400 clamp(42px,4vw,66px)/1.03 Georgia,serif;
+  letter-spacing:-.045em;
+  margin:8px 0 11px;
+  text-shadow:0 4px 30px #0008;
+}
+.studio-home .studio-lead {
+  max-width:700px;
+  font-size:clamp(13px,1.05vw,15px);
+  line-height:1.55;
+  color:#d9cbd8;
+  margin:0 0 20px;
+}
+.studio-home .studio-feature-label {
+  max-width:1190px;
+  margin:4px 0 11px;
+  font-size:10px;
+  letter-spacing:.19em;
+  color:#e0c4d8;
+}
+.studio-home .studio-mode-grid,
+.studio-home .studio-experiments-grid {
+  width:100%;
+  max-width:1190px;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin:0;
+}
+.studio-home .studio-experiments-grid {margin-top:12px}
+.studio-home .studio-mode,
+.studio-home .studio-experiment-card {
+  min-height:119px;
+  padding:19px 22px;
+  display:grid;
+  grid-template-columns:37px minmax(0,1fr) 24px;
+  grid-template-rows:auto auto;
+  align-content:center;
+  align-items:start;
+  column-gap:14px;
+  row-gap:5px;
+  border-radius:10px;
+  border:1px solid rgba(236,217,230,.25);
+  background:linear-gradient(112deg,rgba(43,34,46,.92),rgba(22,20,28,.88));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 32px rgba(0,0,0,.12);
+  transform:none;
+  transition:border-color .2s ease,background .2s ease,transform .2s ease;
+}
+.studio-home .studio-mode:nth-child(2),
+.studio-home .studio-experiment-blend {
+  background:linear-gradient(112deg,rgba(39,34,53,.92),rgba(20,19,29,.88));
+}
+.studio-home .studio-mode:hover,
+.studio-home .studio-experiment-card:hover {
+  border-color:rgba(239,201,228,.7);
+  transform:translateY(-2px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 36px rgba(0,0,0,.2);
+}
+.studio-home .studio-mode>svg:first-child {
+  grid-column:1;grid-row:1/3;
+  width:25px;height:25px;
+  margin-top:2px;
+  color:#e7c4df;
+}
+.studio-home .studio-mode strong,
+.studio-home .studio-experiment-card strong {
+  grid-column:2;grid-row:1;
+  font:400 clamp(23px,1.9vw,30px)/1.08 Georgia,serif;
+  letter-spacing:-.025em;
+  margin:0;
+}
+.studio-home .studio-mode>span:not(.studio-mode-arrow),
+.studio-home .studio-experiment-card small {
+  grid-column:2;grid-row:2;
+  max-width:none;
+  color:#c9bdcb;
+  font-size:12px;
+  line-height:1.45;
+  margin:0;
+}
+.studio-home .studio-mode .studio-mode-arrow {
+  position:static;
+  grid-column:3;grid-row:1/3;
+  align-self:center;justify-self:end;
+  width:18px;height:18px;
+  color:#e7c5de;
+}
+.studio-home .studio-experiment-icon {
+  grid-column:1;grid-row:1/3;
+  width:32px;height:32px;
+  border-radius:7px;
+  background:rgba(232,196,220,.075);
+  border:1px solid rgba(232,196,220,.22);
+}
+.studio-home .studio-experiment-icon>svg {width:20px;height:20px}
+.studio-home .studio-experiment-icon .studio-fusion-mark {transform:scale(.7)}
+.studio-home .studio-experiment-action {
+  grid-column:3;grid-row:1/3;
+  align-self:center;justify-self:end;
+  font-size:0;
+  padding:0;margin:0;
+  border:0;
+}
+.studio-home .studio-experiment-action svg {width:18px;height:18px}
+
+/* Slimmer interior typography, controls and panel borders. */
+.studio:not(.studio-home) .studio-feature-screen,
+.studio:not(.studio-home) .studio-workspace,
+.studio:not(.studio-home) .studio-discovery-screen {
+  color:#f5eef5;
+}
+.studio .studio-discovery-banner,
+.studio .studio-lab-banner-compact,
+.studio .studio-fusion-banner-compact {
+  border-radius:9px;
+  border:1px solid var(--studio-edge);
+  background:linear-gradient(112deg,#29232e,#17151d 70%);
+  box-shadow:none;
+}
+.studio .studio-discovery-banner h1,
+.studio .studio-fusion-banner-compact h1,
+.studio .studio-lab-banner-compact h2 {
+  letter-spacing:-.04em;
+}
+.studio .studio-discovery-screen .studio-visual-mood {
+  border-radius:8px;
+  border:1px solid rgba(255,255,255,.23);
+  box-shadow:none;
+  transition:transform .18s,border-color .18s;
+}
+.studio .studio-discovery-screen .studio-visual-mood:hover {transform:translateY(-2px)}
+.studio .studio-discovery-screen .studio-visual-mood.chosen {
+  outline:2px solid #e9c6e2;
+  outline-offset:-3px;
+  box-shadow:inset 0 0 0 1px #ffffff40;
+}
+.studio .studio-discovery-screen .studio-chat-inline {
+  border-radius:8px;
+  border-color:var(--studio-edge);
+  background:#1d1a22;
+  box-shadow:none;
+}
+.studio .studio-discovery-screen .studio-chat-inline .studio-chat-compose {
+  border-radius:6px;
+  background:#121017;
+}
+.studio .studio-discovery-screen .studio-discover-cta {
+  border-radius:8px;
+  border-color:rgba(233,194,225,.45);
+  background:linear-gradient(145deg,#6a4c71,#493850);
+  box-shadow:none;
+}
+.studio .studio-discovery-screen .studio-discover-cta:hover:not(:disabled) {
+  background:linear-gradient(145deg,#795782,#56405f);
+}
+.studio .studio-feature-console,
+.studio .studio-feature-output,
+.studio .studio-columns.lab .studio-controls,
+.studio .studio-columns.lab .studio-results {
+  border-radius:9px;
+  border-color:var(--studio-edge);
+  box-shadow:none;
+}
+.studio .studio-feature-console h2,
+.studio .studio-feature-output h2 {
+  letter-spacing:-.035em;
+}
+.studio .studio-film-picker-input-wrap,
+.studio .studio-film-picker,
+.studio .studio-axis:not(.discovery),
+.studio .studio-advanced-filters,
+.studio .studio-fusion-advanced {
+  border-radius:7px;
+}
+.studio .studio-film,
+.studio .studio-feature-matches button {
+  border-radius:7px;
+  border-color:rgba(255,255,255,.15);
+  background:#201c25;
+  box-shadow:none;
+}
+.studio .studio-film:hover,
+.studio .studio-feature-matches button:hover {
+  border-color:rgba(232,192,220,.6);
+}
+.studio .studio-match-score {
+  border-radius:5px;
+  border-color:rgba(231,192,217,.3);
+  background:rgba(231,192,217,.075);
+}
+.studio .studio-primary {
+  border-radius:7px;
+  box-shadow:none;
+}
+@media(min-width:1101px) {
+  .studio .studio-columns.lab .studio-results .studio-film {
+    grid-template-columns:48px minmax(0,1fr);
+    padding:9px;
+  }
+  .studio .studio-columns.lab .studio-results .studio-poster {
+    width:48px;min-width:48px;height:72px;
+  }
+  .studio .studio-columns.lab .studio-results .studio-film h3 {
+    font-size:14px;
+    letter-spacing:-.015em;
+  }
+  .studio .studio-fusion-output .studio-feature-matches button {
+    border-radius:7px;
+    padding:9px;
+  }
+}
+@media(max-width:780px) {
+  .studio-home .studio-hero {padding:26px 18px}
+  .studio-home .studio-mode-grid,
+  .studio-home .studio-experiments-grid {grid-template-columns:1fr;gap:10px}
+  .studio-home .studio-mode,
+  .studio-home .studio-experiment-card {min-height:105px;padding:16px 17px}
+  .studio-home .studio-hero h1 {font-size:clamp(36px,8vw,50px)}
+  .studio-home .studio-lead {font-size:13px}
+  .studio .studio-nav {padding:10px 16px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .studio-home .studio-cinema-carousel .studio-cinema-frame,
+  .studio-home .studio-mode,
+  .studio-home .studio-experiment-card,
+  .studio .studio-discovery-screen .studio-visual-mood {
+    transition:none;
+    transform:none;
+  }
+}
+
+/* Homepage carousel repair:
+   The original backdrop inherited z-index:-2 from studio.css. Since the
+   isolated hero has its own opaque background, that placed every film image
+   BEHIND the hero itself. Keep the artwork inside the hero stacking context,
+   above its background and below the editorial content. */
+.studio-home .studio-hero {
+  position:relative;
+  isolation:isolate;
+}
+.studio-home .studio-hero::before {display:none}
+.studio-home .studio-cinema-carousel {
+  z-index:0;
+  /* First-film fallback if hydration is delayed or an image event is missed. */
+  background:#18131b url("https://image.tmdb.org/t/p/w1280/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg") center 38% / cover no-repeat!important;
+}
+.studio-home .studio-hero > :not(.studio-cinema-carousel) {
+  position:relative;
+  z-index:2;
+}
+.studio-home .studio-cinema-carousel .studio-cinema-frame {
+  z-index:0;
+}
+.studio-home .studio-cinema-carousel::after {
+  z-index:1;
+  background:
+    linear-gradient(90deg,rgba(8,8,13,.87) 0%,rgba(8,8,13,.73) 35%,rgba(8,8,13,.22) 78%,rgba(8,8,13,.38) 100%),
+    linear-gradient(0deg,rgba(8,8,13,.75) 0%,transparent 48%);
+}
