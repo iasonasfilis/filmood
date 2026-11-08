@@ -285,3 +285,32 @@
     transform:none;
   }
 }
+
+/* Homepage carousel repair:
+   The original backdrop inherited z-index:-2 from studio.css. Since the
+   isolated hero has its own opaque background, that placed every film image
+   BEHIND the hero itself. Keep the artwork inside the hero stacking context,
+   above its background and below the editorial content. */
+.studio-home .studio-hero {
+  position:relative;
+  isolation:isolate;
+}
+.studio-home .studio-hero::before {display:none}
+.studio-home .studio-cinema-carousel {
+  z-index:0;
+  /* First-film fallback if hydration is delayed or an image event is missed. */
+  background:#18131b url("https://image.tmdb.org/t/p/w1280/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg") center 38% / cover no-repeat!important;
+}
+.studio-home .studio-hero > :not(.studio-cinema-carousel) {
+  position:relative;
+  z-index:2;
+}
+.studio-home .studio-cinema-carousel .studio-cinema-frame {
+  z-index:0;
+}
+.studio-home .studio-cinema-carousel::after {
+  z-index:1;
+  background:
+    linear-gradient(90deg,rgba(8,8,13,.87) 0%,rgba(8,8,13,.73) 35%,rgba(8,8,13,.22) 78%,rgba(8,8,13,.38) 100%),
+    linear-gradient(0deg,rgba(8,8,13,.75) 0%,transparent 48%);
+}
