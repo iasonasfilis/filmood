@@ -152,7 +152,6 @@ export default function Studio(){
  const [liked,setLiked]=useState<number[]>([]);
  const [providerOpen,setProviderOpen]=useState(false);
  const [menuOpen,setMenuOpen]=useState(false);
- const [showFilmPreferences,setShowFilmPreferences]=useState(false);
  const [showDiscoveryResults,setShowDiscoveryResults]=useState(false);
  const [backdropIndex,setBackdropIndex]=useState(0);
  const [loadedBackdrops,setLoadedBackdrops]=useState<number[]>([]);
@@ -270,7 +269,7 @@ export default function Studio(){
  const toggle=(list:number[],fn:(ids:number[])=>void,id:number)=>fn(list.includes(id)?list.filter(x=>x!==id):[...list,id]);
  const reset=()=>{setMix({...(labBase==="Custom mix"?neutralDNA:(REFERENCES.find(r=>r.name===labBase)?.dna||FILMS.find(f=>f.title===labBase)?.dna||neutralDNA))});setRegion("Anywhere");setRuntime("Any length");setDepth(52);};
  const sharedReason=(f:Film)=>{const closer=AXES.map(a=>({key:a.key,name:readable(a.key,f),delta:Math.abs(f.dna[a.key]-target[a.key])})).sort((a,b)=>a.delta-b.delta).slice(0,2).map(a=>a.name).join(" and ");const differences=AXES.map(a=>({name:a.name.toLowerCase(),delta:f.dna[a.key]-target[a.key]})).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));const contrast=differences[0];return "The vibe match: "+closer+". Compared with your mix, "+f.title+" leans "+(contrast.delta>0?"more ":"less ")+contrast.name+". "+f.description;};
- return <main className={"studio"+(view==="start"?" studio-home":"")}>
+ return <main className={"studio"+(view==="start"?" studio-home":"")+(view==="play"?" studio-play-active":"")}>
   <header className="studio-nav"><button className="studio-menu-toggle" aria-label="Open site menu" aria-expanded={menuOpen} onClick={()=>setMenuOpen(true)}><Menu size={23}/></button>
    <a href="/" className="studio-word">FILMOOD<span>.</span></a>
    <nav aria-label="Personal cinema"><button className="studio-account-nav" onClick={()=>navigate("fingerprint")}><Fingerprint size={18}/> My Cinema</button></nav>
