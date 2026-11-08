@@ -79,3 +79,5 @@ export default function Discover(){
    </section>
   </div>
  </main>;
+
+}
