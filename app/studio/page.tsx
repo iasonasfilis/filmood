@@ -155,6 +155,20 @@ export default function Studio(){
  const [showDiscoveryResults,setShowDiscoveryResults]=useState(false);
  const [backdropIndex,setBackdropIndex]=useState(0);
  const [loadedBackdrops,setLoadedBackdrops]=useState<number[]>([]);
+ const backdropImageRefs=useRef<(HTMLImageElement|null)[]>([]);
+ const markBackdropReady=(index:number)=>setLoadedBackdrops(previous=>
+  previous.includes(index)?previous:[...previous,index].sort((a,b)=>a-b)
+ );
+ // Cached images may finish loading before React attaches onLoad during hydration.
+ // Check the DOM images once after mounting, as well as handling later load events.
+ useEffect(()=>{
+  const ready=backdropImageRefs.current.flatMap((image,index)=>
+   image?.complete&&image.naturalWidth>0?[index]:[]
+  );
+  if(ready.length)setLoadedBackdrops(previous=>
+   [...new Set([...previous,...ready])].sort((a,b)=>a-b)
+  );
+ },[]);
  const [details,setDetails]=useState<Film|null>(null);
  const [loaded,setLoaded]=useState(false);
  // Only rotate through images that the browser actually loaded; a broken TMDB URL
@@ -283,7 +297,7 @@ export default function Studio(){
     <button className="studio-primary studio-services-done" onClick={()=>setProviderOpen(false)}>Save my selection <Check size={17}/></button>
    </section></div>}
   {view==="start"&&<section className="studio-hero">
-   <div className="studio-cinema-backdrop studio-cinema-carousel" aria-hidden="true">{HOME_BACKDROPS.map((frame,i)=><div key={frame.title} className={"studio-cinema-frame"+(backdropIndex===i&&loadedBackdrops.includes(i)?" is-active":"")}><img src={"https://image.tmdb.org/t/p/w1280/"+frame.image} alt="" loading="eager" decoding="async" onLoad={()=>setLoadedBackdrops(previous=>previous.includes(i)?previous:[...previous,i].sort((a,b)=>a-b))}/></div>)}</div>
+   <div className="studio-cinema-backdrop studio-cinema-carousel" aria-hidden="true">{HOME_BACKDROPS.map((frame,i)=><div key={frame.title} className={"studio-cinema-frame"+(backdropIndex===i&&loadedBackdrops.includes(i)?" is-active":"")}><img ref={node=>{backdropImageRefs.current[i]=node;}} src={"https://image.tmdb.org/t/p/w1280/"+frame.image} alt="" loading="eager" decoding="async" onLoad={()=>markBackdropReady(i)}/></div>)}</div>
    <p className="studio-eyebrow">FILMOOD ORIGINAL DISCOVERY EXPERIENCE</p>
    <h1>Some feelings deserve<br/><em>another film.</em></h1>
    <p className="studio-lead">A cinematic experience built around what moves you. Pick a direction. The discovery begins on the next screen.</p>
