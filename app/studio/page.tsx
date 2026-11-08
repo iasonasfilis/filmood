@@ -8,6 +8,7 @@ import "./discovery-layout.css";
 import "./extra-features.css";
 import "./compact-experiences.css";
 import "./studio-polish.css";
+import "./discovery-refinement.css";
 import { FILMS, type Film } from "./film-data";
 
 type Axis = "dark" | "pace" | "emotion" | "mind" | "visual" | "indie" | "humor" | "action";
